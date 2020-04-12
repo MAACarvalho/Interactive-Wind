@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<materialLib name="GrassLib">
+
+	<!-- <states>
+		<state name="cullFront">
+			<CULL_TYPE value="FRONT" />
+		</state>
+	</states> -->
+
+	<textures>
+		<texture name="blade_1"  		filename="../textures/grass/bld_1.png" 		mipmap=true />
+		<texture name="blade_2"  		filename="../textures/grass/bld_2.png" 		mipmap=true />
+		<texture name="blade_3"  		filename="../textures/grass/bld_3.png" 		mipmap=true />
+		<texture name="blade_4"  		filename="../textures/grass/bld_4.png" 		mipmap=true />
+		<texture name="blade_5"  		filename="../textures/grass/bld_5.png"		mipmap=true />
+		<texture name="blade_6"  		filename="../textures/grass/bld_6.png" 		mipmap=true />
+		<texture name="blade_7"  		filename="../textures/grass/bld_7.png" 		mipmap=true />
+	</textures>
+
+	<shaders>
+		<shader name="GrassShader"		vs = "../shaders/grass.vert" 
+										tc = "../shaders/grass.tesc"
+										gs = "../shaders/grass.geom"
+										te = "../shaders/grass.tese"
+										ps = "../shaders/grass.frag"  />
+	</shaders>
+
+	<materials>
+		<material name="GrassMat">
+			<shader name="GrassShader">
+				<values>
+
+					<!-- Spaces Matrixes -->
+
+					<valueof uniform="m_projViewModel" 
+							type="RENDERER" context="CURRENT" 
+							component="PROJECTION_VIEW_MODEL" />
+
+					<valueof uniform="m_projView" 
+							type="RENDERER" context="CURRENT" 
+							component="PROJECTION_VIEW" />
+
+					<valueof uniform="m_viewModel" 
+							type="RENDERER" context="CURRENT" 
+							component="VIEW_MODEL" />
+
+					<valueof uniform="m_model" 
+							type="RENDERER" context="CURRENT" 
+							component="MODEL" />
+							 
+					<valueof uniform="m_view" 
+							type="RENDERER" context="CURRENT" 
+							component="VIEW" />
+							 
+					<!-- Ligth -->
+
+					<valueof uniform="specular" 
+							type="COLOR" context="CURRENT" 
+							component="SPECULAR" />
+							 
+					<valueof uniform="shininess" 
+							type="COLOR" context="CURRENT" 
+							component="SHININESS" />
+							 
+					<valueof uniform="light_dir" 
+							type="LIGHT" context="Sun"
+							component="DIRECTION" />
+
+					<!-- Camera -->
+
+					<valueof uniform="camera_pos"
+							 type="CAMERA" context="CURRENT"
+							 component="POSITION" /> 
+
+					<!-- Grass Properties -->
+
+					<valueof uniform="blade_height"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_HEIGHT"/>
+							
+					<valueof uniform="max_height_variation"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_HEIGHT_VARIATION"/>
+
+					<valueof uniform="blade_width"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_WIDTH"/>
+
+					<valueof uniform="blade_levels"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_LEVELS"/>
+
+					<valueof uniform="grass_density"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_DENSITY"/>
+
+					<valueof uniform="grass_size"
+							 type="SCENE" 	context="GrassScene"
+							 component="SCALE"/>
+					
+					<valueof uniform="max_rotation_angle"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_ROTATION"/>
+
+					<valueof uniform="max_inclination_angle"
+							 type="RENDERER" context="CURRENT"
+							 component="GRASS_INCLINE"/>
+
+
+					<!-- Textures -->
+
+					<valueof uniform="blade_1"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=0 />
+					
+					<valueof uniform="blade_2"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=1 />
+
+					<valueof uniform="blade_3"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=2 />
+
+					<valueof uniform="blade_4"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=3 />
+
+					<valueof uniform="blade_5"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=4 />
+
+					<valueof uniform="blade_6"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=5 />
+
+					<valueof uniform="blade_7"
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 component="UNIT" id=6 />
+
+				</values>
+			</shader>
+			<textures>
+
+				<texture name="blade_1"  		UNIT = 0 />
+				<texture name="blade_2"  		UNIT = 1 />
+				<texture name="blade_3"  		UNIT = 2 />
+				<texture name="blade_4"  		UNIT = 3 />
+				<texture name="blade_5"  		UNIT = 4 />
+				<texture name="blade_6"  		UNIT = 5 />
+				<texture name="blade_7"  		UNIT = 6 />
+				
+			</textures>
+		</material>
+	</materials>
+</materialLib>

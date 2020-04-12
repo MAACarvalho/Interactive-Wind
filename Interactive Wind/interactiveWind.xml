@@ -1,0 +1,147 @@
+<?xml version="1.0" ?>
+<project name="Interactive Wind" >
+	<assets>
+
+		<attributes>
+
+			<!-- Grass Related Attributes -->
+
+			<attribute name="GRASS_HEIGHT" 
+					   data="FLOAT" type="RENDERER" 	value="0.4" />
+
+			<attribute name="GRASS_HEIGHT_VARIATION" 
+					   data="FLOAT" type="RENDERER" 	value="0.25" />
+
+			<attribute name="GRASS_WIDTH" 
+					   data="FLOAT" type="RENDERER" 	value="0.025" />
+
+			<attribute name="GRASS_LEVELS" 
+					   data="INT" 	type="RENDERER" 	value="4" />
+
+			<attribute name="GRASS_DENSITY" 
+					   data="INT" 	type="RENDERER" 	value="5" />
+
+			<attribute name="GRASS_INCLINE" 
+					   data="FLOAT" type="RENDERER" 	value="0.3" />
+
+			<attribute name="GRASS_ROTATION" 
+					   data="FLOAT" type="RENDERER" 	value="1" />
+
+		</attributes>
+
+		<scenes>
+			<scene name="GrassScene" param="UNITIZE">
+				<file name="models/square.patch"/>
+				<ROTATE x=1 y=0 z=0 w=90/>
+			</scene>
+			<scene name="GroundScene" type="OctreeByMat">
+				<file name="models/square.patch"/>
+				<ROTATE x=1 y=0 z=0 w=90/>
+				<SCALE x=1.1 y=1.1 z=1 />
+			</scene>
+			<scene name="AxisScene" type="Scene">
+				<geometry name = "Axis" type = "AXIS">
+					<SCALE x=50 y=50 z =50 />
+				</geometry>
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="1.0" g="1.0" b="1.0" />
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<POSITION x=-0.8143 y=1.066161 z=1.525997 />
+				<VIEW x=0.300459 y=-0.560906 z=-0.771433 />
+				<NEAR value= 0.1/>
+				<FAR value= 1000/>
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x=2 y=-1 z=-2 />
+			</light>
+		</lights>
+		
+		<materialLibs>
+			<materialLib filename="materials/grass.mlib" />
+			<materialLib filename="materials/ground.mlib" />
+		</materialLibs>
+	</assets>
+	
+	<pipelines>
+		<pipeline name="main" default="true" defaultCamera="MainCamera">
+
+			<pass class="default" name="GrassPass" >
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="GrassScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" 	toLibrary="GrassLib" 	toMaterial="GrassMat"/>
+				</materialMaps>
+			</pass>
+
+			<pass class="default" name="GroundPass" >
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="GroundScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
+				</materialMaps>
+			</pass>
+
+			<pass class="default" name="AxissPass" >
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="AxisScene" />
+				</scenes>	
+			</pass>
+
+		</pipeline>
+	</pipelines>
+
+	<interface>
+		<window label="Grass">
+			
+			<var label="Blade Height" 	type="RENDERER" context="CURRENT" 
+				component="GRASS_HEIGHT" def="min=0.1 max=5 step=0.1" />
+			<var label="Max Blade Height Variation" 	type="RENDERER" context="CURRENT" 
+				component="GRASS_HEIGHT_VARIATION" def="min=0.1 max=0.9 step=0.1" />
+			<var label="Blade Width"  	type="RENDERER" context="CURRENT"  	
+				component="GRASS_WIDTH"  def="min=0.005 max=0.05 step=0.005"/>
+			<var label="Blade Levels"  	type="RENDERER" context="CURRENT"  	
+				component="GRASS_LEVELS" def="min=2 max=15 step=1"/>
+			<var label="Grass Density"  type="RENDERER" context="CURRENT"  	
+				component="GRASS_DENSITY" def="min=1 max=201 step=2"/>
+			<var label="Grass Size"	  	type="SCENE" context="GrassScene"  	
+				component="SCALE" 		  def="min=0.5 max=2 step=0.1"/>
+			<var label="Grass Inclination"  type="RENDERER" context="CURRENT"  	
+				component="GRASS_INCLINE" def="min=0 max=1 step=0.05"/>
+			<var label="Grass Rotation"  type="RENDERER" context="CURRENT"  	
+				component="GRASS_ROTATION" def="min=0 max=1 step=0.05"/>
+			<var label="Ground Size"	type="SCENE" context="GroundScene"  	
+				component="SCALE" 		  def="min=0.5 max=2 step=0.1"/>
+				
+		</window>	
+	</interface>
+</project>
