@@ -1,64 +1,66 @@
 <?xml version="1.0" ?>
-<project name="Interactive Wind" >
+<project name="Interactive Wind" width="512" height="512">
 	<assets>
-
 		<attributes>
 
-			<!-- Grass Related Attributes -->
+			<!-- Grass Blades -->
 
-			<attribute name="GRASS_HEIGHT" 
-					   data="FLOAT" type="RENDERER" 	value="0.4" />
-
-			<attribute name="GRASS_HEIGHT_VARIATION" 
-					   data="FLOAT" type="RENDERER" 	value="0.25" />
-
-			<attribute name="GRASS_WIDTH" 
-					   data="FLOAT" type="RENDERER" 	value="0.025" />
-
-			<attribute name="GRASS_LEVELS" 
-					   data="INT" 	type="RENDERER" 	value="4" />
-
-			<attribute name="GRASS_DENSITY" 
-					   data="INT" 	type="RENDERER" 	value="5" />
-
-			<attribute name="GRASS_INCLINE" 
-					   data="FLOAT" type="RENDERER" 	value="0.3" />
-
-			<attribute name="GRASS_ROTATION" 
-					   data="FLOAT" type="RENDERER" 	value="1" />
-
+			<attribute name="BLADE_LEVELS" 
+				data="UINT"  type="RENDERER" value="1" />
+			<attribute name="BLADE_HEIGHT" 
+				data="FLOAT" type="RENDERER" value="3.0" />
+			<attribute name="BLADE_HEIGHT_VAR" 
+				data="FLOAT" type="RENDERER" value="0.05" />
+			<attribute name="BLADE_WIDTH"  
+				data="FLOAT" type="RENDERER" value="0.25" />
+			<attribute name="BLADE_WIDTH_VAR"  
+				data="FLOAT" type="RENDERER" value="0.05" />
+			<attribute name="BLADE_SEPARATION"  
+				data="FLOAT" type="RENDERER" value="1.25" />
+			<attribute name="BLADE_SEPARATION_VAR"  
+				data="FLOAT" type="RENDERER" value="0.25" />
+			<attribute name="BLADE_INCLINATION" 
+				data="FLOAT" type="RENDERER" value="0.2"/>
+			<attribute name="BLADE_INCLINATION_VAR" 
+				data="FLOAT" type="RENDERER" value="0.05"/>
+			<attribute name="BLADE_ROTATION" 
+				data="FLOAT" type="RENDERER" value="0.0" />
+			<attribute name="BLADE_ROTATION_VAR" 
+				data="FLOAT" type="RENDERER" value="0.05" />
+			
+			<attribute name="BLADE_RANDOM_SEED" 
+				data="FLOAT" type="RENDERER" value="1" />
+			
 		</attributes>
-
+		
 		<scenes>
-			<scene name="GrassScene" param="UNITIZE">
+			<scene name="GrassBladeScene" type="OctreeByMat">
 				<file name="models/square.patch"/>
-				<ROTATE x=1 y=0 z=0 w=90/>
 			</scene>
 			<scene name="GroundScene" type="OctreeByMat">
-				<file name="models/square.patch"/>
-				<ROTATE x=1 y=0 z=0 w=90/>
-				<SCALE x=1.1 y=1.1 z=1 />
+				<file name="models/plane.patch"/>
+				<SCALE x=15 y=1 z=15 />
 			</scene>
 			<scene name="AxisScene" type="Scene">
 				<geometry name = "Axis" type = "AXIS">
-					<SCALE x=50 y=50 z =50 />
+					<SCALE x=4 y=4 z =4 />
 				</geometry>
 			</scene>
 		</scenes>
 		
 		<viewports>
 			<viewport name="MainViewport">
-				<CLEAR_COLOR r="1.0" g="1.0" b="1.0" />
+				<CLEAR_COLOR r="1" g="1" b="1" />
 			</viewport>
 		</viewports>
 		
 		<cameras>
 			<camera name="MainCamera" >
 				<viewport name="MainViewport" />
-				<POSITION x=-0.8143 y=1.066161 z=1.525997 />
-				<VIEW x=0.300459 y=-0.560906 z=-0.771433 />
-				<NEAR value= 0.1/>
-				<FAR value= 1000/>
+				<projection TYPE="PERSPECTIVE" NEAR=1 FAR=1000.0 />
+				<POSITION x=3.5 y=9 z=10 />
+				<LOOK_AT_POINT x=0 y=3 z=0 />
+				<UP x=0 y=1 z=0 />
 			</camera>
 		</cameras>
 		
@@ -67,30 +69,31 @@
 				<DIRECTION x=2 y=-1 z=-2 />
 			</light>
 		</lights>
-		
+
 		<materialLibs>
 			<materialLib filename="materials/grass.mlib" />
 			<materialLib filename="materials/ground.mlib" />
 		</materialLibs>
+		
 	</assets>
 	
 	<pipelines>
-		<pipeline name="main" default="true" defaultCamera="MainCamera">
-
-			<pass class="default" name="GrassPass" >
+		<pipeline name="Grass" default="true">
+			<!-- Grass Pass -->
+			<pass class="default" name="GrassPass">
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
-				<scenes>
-					<scene name="GrassScene" />
+				<scenes instances = 25>
+					<scene name="GrassBladeScene" />
 				</scenes>
 				<lights>
 					<light name="Sun" />
 				</lights>
 				<materialMaps>
-					<map fromMaterial="*" 	toLibrary="GrassLib" 	toMaterial="GrassMat"/>
+					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
 			</pass>
-
+			<!-- Ground Pass -->
 			<pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -106,7 +109,7 @@
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
 				</materialMaps>
 			</pass>
-
+			<!-- Axis Pass -->
 			<pass class="default" name="AxissPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -116,32 +119,54 @@
 					<scene name="AxisScene" />
 				</scenes>	
 			</pass>
-
 		</pipeline>
 	</pipelines>
-
+	
 	<interface>
-		<window label="Grass">
+		<window label="Ground Properties">
+
+			<var label="Ground Size"	type="SCENE" context="GroundScene"
+				component="SCALE" />
+
+		</window>
+		<window label="Grass Blade Properties">
 			
-			<var label="Blade Height" 	type="RENDERER" context="CURRENT" 
-				component="GRASS_HEIGHT" def="min=0.1 max=5 step=0.1" />
-			<var label="Max Blade Height Variation" 	type="RENDERER" context="CURRENT" 
-				component="GRASS_HEIGHT_VARIATION" def="min=0.1 max=0.9 step=0.1" />
-			<var label="Blade Width"  	type="RENDERER" context="CURRENT"  	
-				component="GRASS_WIDTH"  def="min=0.005 max=0.05 step=0.005"/>
-			<var label="Blade Levels"  	type="RENDERER" context="CURRENT"  	
-				component="GRASS_LEVELS" def="min=2 max=15 step=1"/>
-			<var label="Grass Density"  type="RENDERER" context="CURRENT"  	
-				component="GRASS_DENSITY" def="min=1 max=201 step=2"/>
-			<var label="Grass Size"	  	type="SCENE" context="GrassScene"  	
-				component="SCALE" 		  def="min=0.5 max=2 step=0.1"/>
-			<var label="Grass Inclination"  type="RENDERER" context="CURRENT"  	
-				component="GRASS_INCLINE" def="min=0 max=1 step=0.05"/>
-			<var label="Grass Rotation"  type="RENDERER" context="CURRENT"  	
-				component="GRASS_ROTATION" def="min=0 max=1 step=0.05"/>
-			<var label="Ground Size"	type="SCENE" context="GroundScene"  	
-				component="SCALE" 		  def="min=0.5 max=2 step=0.1"/>
-				
-		</window>	
+			<var label="Levels" 				type="RENDERER" context="CURRENT"
+				component="BLADE_LEVELS" 				def="min=1 max=64 step=1"/>
+
+			<var label="Height" 				type="RENDERER" context="CURRENT" 
+				component="BLADE_HEIGHT" 				def="min=0.1 max=5.0 step=0.1" />
+
+			<var label="Height Var" 			type="RENDERER" context="CURRENT" 
+				component="BLADE_HEIGHT_VAR" 			def="min=0.00 max=1.0 step=0.05" />
+			
+			<var label="Width"  				type="RENDERER" context="CURRENT"  	
+				component="BLADE_WIDTH"  				def="min=0.05 max=1.0 step=0.05"/>
+
+			<var label="Width Var" 				type="RENDERER" context="CURRENT" 
+				component="BLADE_WIDTH_VAR"		 		def="min=0.00 max=1.0 step=0.05" />
+			
+			<var label="Separation"  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_SEPARATION"  			def="min=0.05 max=2.0 step=0.05"/>
+			
+			<var label="Separation Var"  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_SEPARATION_VAR"  		def="min=0.00 max=2.0 step=0.05"/>
+
+			<var label="Inclination"  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_INCLINATION"  			def="min=0 max=1 step=0.05"/>
+			
+			<var label="Inclination Var"  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_INCLINATION_VAR"  		def="min=0 max=1 step=0.05"/>
+
+			<var label="Rotation"	  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_ROTATION"  			def="min=0 max=1 step=0.05"/>
+
+			<var label="Rotation Var"	  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_ROTATION_VAR"  		def="min=0 max=1 step=0.05"/>
+
+			<var label="Random Seed"		  	type="RENDERER" context="CURRENT"  	
+				component="BLADE_RANDOM_SEED"  			def="min=1 max=10 step=0.25"/>
+			
+		</window>
 	</interface>
 </project>
