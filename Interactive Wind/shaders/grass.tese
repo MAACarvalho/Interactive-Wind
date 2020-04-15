@@ -12,7 +12,7 @@ in Data {
 
 out Data {
 
-	flat int blade_id;
+	int blade_id;
 	vec2 texture_coord;
 
 } DataOut;
@@ -29,6 +29,6 @@ void main() {
 	DataOut.blade_id       =    DataIn[0].blade_id;
 	DataOut.texture_coord  =    vec2(u, v);
 
-	gl_Position = m_projView * mix(p1, p2, v);
+	gl_Position = mix(p1, p2, v);
 }
 

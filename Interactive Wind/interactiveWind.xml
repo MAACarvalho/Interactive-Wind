@@ -93,6 +93,22 @@
 					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
 			</pass>
+			<!-- Grass Normal -->
+			<pass class="default" name="GrassNormalsPass">
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes instances = 25>
+					<scene name="GrassBladeScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassNormalMat" />
+				</materialMaps>
+			</pass>
 			<!-- Ground Pass -->
 			<pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />

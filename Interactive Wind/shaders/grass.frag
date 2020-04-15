@@ -56,5 +56,7 @@ void main() {
 	if (tex.a < 0.8f) discard;
 	
 	output = tex;
+
+	//output = vec4 (0.0, 0.4, 0.0, 1.0);
 	
 }
