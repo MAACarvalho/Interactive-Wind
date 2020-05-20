@@ -14,7 +14,7 @@ out Data {
 
 } DataOut[];
 
-uniform uint bld_levels = 1;
+uniform uint bld_levels = 1; // Vertical divisions of each grass blade
 
 uniform mat4 m_projView;
 
@@ -69,7 +69,7 @@ void main() {
 			gl_TessLevelOuter[1] = 1;
 			gl_TessLevelOuter[2] = 1;
 			gl_TessLevelOuter[3] = 1;
-			gl_TessLevelInner[0] = 1;
+			gl_TessLevelInner[0] = 0;
 			gl_TessLevelInner[1] = float(bld_levels);
 			
 		// Culling blade

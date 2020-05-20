@@ -62,7 +62,14 @@ void main()
 
 	DataOut.blade_id = DataIn[0].blade_id;
 
-	emitFrontFace ();
-	emitBackFace ();
-	
+	vec3 v1 = gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz;
+	vec3 v2 = gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz;
+
+	vec3 triangle_normal = cross(normalize(v2), normalize(v1));
+
+	// Ignoring "invisible" triangles
+	if (length(triangle_normal) > 0.000001) { emitFrontFace(); emitBackFace();}
+	else EndPrimitive();
+
+
 }

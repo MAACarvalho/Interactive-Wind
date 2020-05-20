@@ -212,7 +212,16 @@
 
 					<valueof uniform="bld_inclination_var" 	type="RENDERER" context="CURRENT" 
 														component="BLADE_INCLINATION_VAR"  />
+
+					<valueof uniform="bld_stiffness" 		type="RENDERER" context="CURRENT" 
+														component="BLADE_STIFFNESS"  />
+
+					<valueof uniform="bld_stiffness_var" 	type="RENDERER" context="CURRENT" 
+														component="BLADE_STIFFNESS_VAR"  />
 					
+					<valueof uniform="bld_stiffness_comp" type="RENDERER" context="CURRENT" 
+														component="BLADE_STIFFNESS_COMP"  />
+
 					<valueof uniform="bld_rotation" 		type="RENDERER" context="CURRENT" 
 														component="BLADE_ROTATION"  />
 
