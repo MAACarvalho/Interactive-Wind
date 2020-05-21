@@ -1,6 +1,6 @@
 #version 410
 
-layout(quads, fractional_odd_spacing, ccw) in;
+layout(isolines, equal_spacing) in;
 
 uniform	mat4 m_projView;
 
@@ -17,12 +17,16 @@ uniform float rnd_seed;             // Seed used for variation of the blades
 in Data {
 
 	int blade_id;
+	float blade_height;
+    float blade_rotation;
 
 } DataIn[];
 
 out Data {
 
 	int blade_id;
+	float blade_height;
+    float blade_rotation;
 	vec2 texture_coord;
 
 } DataOut;
@@ -44,29 +48,30 @@ float noise(float p){
 
 void main() {
 
-	float u = gl_TessCoord.x;
-	float v = gl_TessCoord.y;
-	float w = 1 - u - v;
+	float v = gl_TessCoord.x;
 	
-	vec4 p1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, u);
-	vec4 p2 = mix(gl_in[3].gl_Position, gl_in[2].gl_Position, u);
+	vec4 pos = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, v);
 	
-	DataOut.blade_id       =    DataIn[0].blade_id;
-	DataOut.texture_coord  =    vec2(u, v);
+	DataOut.blade_id = DataIn[0].blade_id;
+	DataOut.blade_height = DataIn[0].blade_height;
+	DataOut.blade_rotation = DataIn[0].blade_rotation;
+	DataOut.texture_coord = vec2(0, v);
 
 	// Applying bending
-	vec3 gravitational_acceleration = vec3 (0.0, -9.80665, 0.0);
-	vec3 gravity_joint = (1.0 - v) * bld_height * gravitational_acceleration; // * density
+	// vec3 gravitational_acceleration = vec3 (0.0, -9.80665, 0.0);
+	// vec3 gravity_joint = (1.0 - v) * bld_height * gravitational_acceleration; // * density
 
-	vec3 upright_unit_vector = gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz;
+	// vec3 upright_unit_vector = gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz;
 
-	vec3 torque_joint  = cross((1.0 - v) * bld_height * upright_unit_vector, gravity_joint);
+	// vec3 torque_joint  = cross((1.0 - v) * bld_height * upright_unit_vector, gravity_joint);
 
-	float stiffness = bld_stiffness + (noise(DataIn[0].blade_id * rnd_seed * 7816) - 0.5) * bld_stiffness_var;
-	float stiffness_joint = stiffness / (bld_height * v + bld_stiffness_comp);
+	// float stiffness = bld_stiffness + (noise(DataIn[0].blade_id * rnd_seed * 7816) - 0.5) * bld_stiffness_var;
+	// float stiffness_joint = stiffness / (bld_height * v + bld_stiffness_comp);
 
-	vec3 bending_joint = torque_joint * stiffness_joint;
+	// vec3 bending_joint = torque_joint * stiffness_joint;
 
-	gl_Position = mix(p1, p2, v);
+	//gl_Position = mix(p1, p2, v);
+
+	gl_Position = pos;
 }
 

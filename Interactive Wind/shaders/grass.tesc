@@ -1,16 +1,20 @@
 #version 410
 
-layout(vertices = 4) out;
+layout(vertices = 2) out;
 
 in Data {
 
 	int blade_id;
+	float blade_height;
+    float blade_rotation;
 
 } DataIn[];
 
 out Data {
 
 	int blade_id;
+	float blade_height;
+    float blade_rotation;
 
 } DataOut[];
 
@@ -67,27 +71,20 @@ void main() {
 
 			gl_TessLevelOuter[0] = 1;
 			gl_TessLevelOuter[1] = 1;
-			gl_TessLevelOuter[2] = 1;
-			gl_TessLevelOuter[3] = 1;
-			gl_TessLevelInner[0] = 0;
-			gl_TessLevelInner[1] = float(bld_levels);
 			
 		// Culling blade
 		} else {
 
 			gl_TessLevelOuter[0] = 0;
 			gl_TessLevelOuter[1] = 0;
-			gl_TessLevelOuter[2] = 0;
-			gl_TessLevelOuter[3] = 0;
-		
-			gl_TessLevelInner[0] = 0;
-			gl_TessLevelInner[1] = 0;
 
 		}
 	
 	}
 
 	DataOut[gl_InvocationID].blade_id = DataIn[gl_InvocationID].blade_id;
+	DataOut[gl_InvocationID].blade_height = DataIn[gl_InvocationID].blade_height;
+	DataOut[gl_InvocationID].blade_rotation = DataIn[gl_InvocationID].blade_rotation;
 
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }

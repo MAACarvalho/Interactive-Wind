@@ -7,6 +7,8 @@ in vec4 position;
 out Data {
 
     int blade_id;
+    float blade_height;
+    float blade_rotation;
 
 } DataOut;
 
@@ -17,10 +19,10 @@ uniform float bld_width;            // Width of each grass blade
 uniform float bld_width_var;        // Variation in blade width
 uniform float bld_separation;       // Distance between blades
 uniform float bld_separation_var;   // Variation in blade separation
-uniform float bld_inclination;      // Blade inclination
-uniform float bld_inclination_var;  // Variation in blade inclination
 uniform float bld_rotation;         // Blade rotation around Y axis
 uniform float bld_rotation_var;     // Variation in blade rotation
+uniform float bld_inclination;      // Blade inclination
+uniform float bld_inclination_var;  // Variation in blade inclination
 
 uniform float rnd_seed;             // Seed used for variation of the blades
 
@@ -43,12 +45,16 @@ float noise(float p){
 
 vec4 transform (vec4 pos) {
 
-    // Scaling
-    float width = bld_width  + (noise(gl_InstanceID * rnd_seed * 2982) - 0.5) * bld_width_var;
-    float height = bld_height + (noise(gl_InstanceID * rnd_seed * 4751) - 0.5) * bld_height_var;
+    // Height Scaling
+    DataOut.blade_height = bld_height + (noise(gl_InstanceID * rnd_seed * 4751) - 0.5) * bld_height_var;
+    pos.y *= DataOut.blade_height;
 
-    pos.x *= width;
-    pos.y *= height;
+    // Rotating & Inclining
+    DataOut.blade_rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed * 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
+	float inclination = (bld_inclination + (noise (gl_InstanceID * rnd_seed * 8072) - 0.5) * bld_inclination_var) * 0.5 * M_PI;
+	if (gl_VertexID == 1) pos = vec4(DataOut.blade_height * sin(DataOut.blade_rotation) * sin(inclination), 
+                                     DataOut.blade_height * cos(inclination), 
+                                     DataOut.blade_height * cos(DataOut.blade_rotation) * sin(inclination), 1);
 
     // Translating & Centering based on instance ID
     int lines = int(floor(sqrt(instance_count)));
@@ -60,25 +66,6 @@ vec4 transform (vec4 pos) {
 
     pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
     pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
-
-    // Inclining top vertices
-    if (gl_VertexID == 2 || gl_VertexID == 3) {
-
-        float random_inclination = bld_inclination + (noise (gl_InstanceID * rnd_seed * 8072) - 0.5) * bld_inclination_var;
-
-	    pos.y -= height * (1-0 - cos(M_PI * 0.5 * random_inclination));
-	    pos.z -= height * sin(M_PI * 0.5 * random_inclination);
-
-    }
-
-    // Rotating
-    float random_angle = bld_rotation + (noise (gl_InstanceID * rnd_seed * 6153) - 0.5) * bld_rotation_var;
-
-    float x_rotation = width * (1 - cos (random_angle * 2 * M_PI));
-    float z_rotation = width * sin (random_angle * 2 * M_PI);
-
-	pos.x += (gl_VertexID == 0 || gl_VertexID == 3) ? x_rotation : - x_rotation;
-	pos.z += (gl_VertexID == 0 || gl_VertexID == 3) ? z_rotation : - z_rotation;
 
     return pos;
 

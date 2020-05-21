@@ -42,7 +42,7 @@
 		
 		<scenes>
 			<scene name="GrassBladeScene" type="OctreeByMat">
-				<file name="models/square.patch"/>
+				<file name="models/line.patch"/>
 			</scene>
 			<scene name="GroundScene" type="OctreeByMat">
 				<file name="models/plane.patch"/>
@@ -101,7 +101,7 @@
 				</materialMaps>
 			</pass>
 			<!-- Grass Normal -->
-			<pass class="default" name="GrassNormalsPass">
+			<!-- <pass class="default" name="GrassNormalsPass">
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -115,9 +115,9 @@
 				<materialMaps>
 					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassNormalMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 			<!-- Ground Pass -->
-			<!-- <pass class="default" name="GroundPass" >
+			<pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -131,9 +131,9 @@
 				<materialMaps>
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
 				</materialMaps>
-			</pass> -->
+			</pass>
 			<!-- Axis Pass -->
-			<!-- <pass class="default" name="AxissPass" >
+			<pass class="default" name="AxissPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -141,7 +141,7 @@
 				<scenes>
 					<scene name="AxisScene" />
 				</scenes>	
-			</pass> -->
+			</pass>
 		</pipeline>
 	</pipelines>
 	
