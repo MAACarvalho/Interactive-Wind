@@ -53,10 +53,10 @@ void main() {
 	else if (random < 0.85714) 	tex = texture (bld_tex_6, texture_coord);
 	else 						tex = texture (bld_tex_7, texture_coord);
 
-	//if (tex.a < 0.8f) discard;
+	if (tex.a < 0.8f) discard;
 	
 	output = tex;
 
-	output = vec4 (0.0, 0.4, 0.0, 1.0);
+	//output = vec4 (0.0, texture_coord.y * 0.1 + 0.4, 0.0, 1.0);
 	
 }

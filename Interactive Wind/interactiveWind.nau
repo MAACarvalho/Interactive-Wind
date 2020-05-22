@@ -117,7 +117,7 @@
 				</materialMaps>
 			</pass> -->
 			<!-- Ground Pass -->
-			<pass class="default" name="GroundPass" >
+			<!-- <pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -131,7 +131,7 @@
 				<materialMaps>
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 			<!-- Axis Pass -->
 			<pass class="default" name="AxissPass" >
 				<COLOR_CLEAR value = false />

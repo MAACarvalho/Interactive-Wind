@@ -8,9 +8,6 @@ uniform uint bld_levels = 1; 		// Vertical divisions of each grass blade
 uniform float bld_height;           // Height of each grass blade
 uniform float bld_width;            // Width of each grass blade
 uniform float bld_separation;       // Distance between blades
-uniform float bld_stiffness; 		// Base stiffness of a grass blade
-uniform float bld_stiffness_var; 	// Variation in the stiffness of a grass blade
-uniform float bld_stiffness_comp; 	// Compensation for the stiffness of a grass blade
 
 uniform float rnd_seed;             // Seed used for variation of the blades
 
@@ -20,6 +17,15 @@ in Data {
 	float blade_height;
     float blade_rotation;
 
+	vec3 up;
+    vec3 direction;
+    vec3 tangent;
+
+	vec4 normal;
+
+	vec4 control_point;
+	vec4 initial_tip;
+
 } DataIn[];
 
 out Data {
@@ -28,6 +34,15 @@ out Data {
 	float blade_height;
     float blade_rotation;
 	vec2 texture_coord;
+
+	vec3 up;
+    vec3 direction;
+    vec3 tangent;
+
+	vec4 normal;
+
+	vec4 control_point;
+	vec4 initial_tip;
 
 } DataOut;
 
@@ -50,28 +65,24 @@ void main() {
 
 	float v = gl_TessCoord.x;
 	
-	vec4 pos = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, v);
-	
 	DataOut.blade_id = DataIn[0].blade_id;
 	DataOut.blade_height = DataIn[0].blade_height;
 	DataOut.blade_rotation = DataIn[0].blade_rotation;
 	DataOut.texture_coord = vec2(0, v);
 
+	DataOut.up = DataIn[1].up;
+	DataOut.direction = DataIn[1].direction;
+	DataOut.tangent = DataIn[1].tangent;
+
+	DataOut.normal = DataIn[1].normal;
+	DataOut.control_point = DataIn[1].control_point;
+	DataOut.initial_tip = DataIn[1].initial_tip;
+	
 	// Applying bending
-	// vec3 gravitational_acceleration = vec3 (0.0, -9.80665, 0.0);
-	// vec3 gravity_joint = (1.0 - v) * bld_height * gravitational_acceleration; // * density
+	vec3 a = gl_in[0].gl_Position.xyz + v * (DataIn[1].control_point.xyz - gl_in[0].gl_Position.xyz);
+	vec3 b = DataIn[1].control_point.xyz + v * (gl_in[1].gl_Position.xyz - DataIn[1].control_point.xyz);
+	vec3 pos = a + v * (b - a);
 
-	// vec3 upright_unit_vector = gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz;
-
-	// vec3 torque_joint  = cross((1.0 - v) * bld_height * upright_unit_vector, gravity_joint);
-
-	// float stiffness = bld_stiffness + (noise(DataIn[0].blade_id * rnd_seed * 7816) - 0.5) * bld_stiffness_var;
-	// float stiffness_joint = stiffness / (bld_height * v + bld_stiffness_comp);
-
-	// vec3 bending_joint = torque_joint * stiffness_joint;
-
-	//gl_Position = mix(p1, p2, v);
-
-	gl_Position = pos;
+	gl_Position = vec4(pos, 1);
 }
 

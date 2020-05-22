@@ -35,6 +35,16 @@ in Data {
     float blade_rotation;
 	vec2 texture_coord;
 
+	vec3 up;
+    vec3 direction;
+    vec3 tangent;
+
+	vec4 normal;
+
+	vec4 control_point;
+
+	vec4 initial_tip;
+
 } DataIn[];
 
 out Data {
@@ -72,20 +82,20 @@ void generateBladeSegment () {
     float width = bld_width  + (noise(DataIn[0].blade_id * rnd_seed * 2982) - 0.5) * bld_width_var;
 
 	// Segment points based o width
-	vec4 p0 = gl_in[0].gl_Position - vec4(width * 0.5 * cos(DataIn[0].blade_rotation), 0, - width * 0.5 * sin(DataIn[0].blade_rotation), 0);
-	vec4 p1 = gl_in[0].gl_Position + vec4(width * 0.5 * cos(DataIn[0].blade_rotation), 0, - width * 0.5 * sin(DataIn[0].blade_rotation), 0);
-	vec4 p2 = gl_in[1].gl_Position + vec4(width * 0.5 * cos(DataIn[0].blade_rotation), 0, - width * 0.5 * sin(DataIn[0].blade_rotation), 0);
-	vec4 p3 = gl_in[1].gl_Position - vec4(width * 0.5 * cos(DataIn[0].blade_rotation), 0, - width * 0.5 * sin(DataIn[0].blade_rotation), 0);
+	vec4 p0 = gl_in[0].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0);
+	vec4 p1 = gl_in[0].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0);
+	vec4 p2 = gl_in[1].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0);;
+	vec4 p3 = gl_in[1].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0);;
 
 	// Emiting front-face segment
 	vec4 ff_p[4] = {p0, p1, p3, p2};
-	float ff_u[4] = {0, 1, 1, 0};
+	float ff_u[4] = {0, 1, 0, 1};
 	float ff_v[4] = {DataIn[0].texture_coord.y, DataIn[0].texture_coord.y, DataIn[1].texture_coord.y, DataIn[1].texture_coord.y};
 	emitBladeSegment (ff_p, ff_u, ff_v);
 
 	// Emiting back-face segment
 	vec4 bf_p[4] = {p1, p0, p2, p3};
-	float bf_u[4] = {1, 0, 0, 1};
+	float bf_u[4] = {1, 0, 1, 0};
 	float bf_v[4] = {DataIn[0].texture_coord.y, DataIn[0].texture_coord.y, DataIn[1].texture_coord.y, DataIn[1].texture_coord.y};
 	emitBladeSegment (bf_p, bf_u, bf_v);
 	
@@ -93,11 +103,37 @@ void generateBladeSegment () {
 
 void generateBladeLine() {
 
+	// DataOut.texture_coord = vec2(0, 0);
+	// gl_Position = m_projView * (gl_in[0].gl_Position + DataIn[1].normal);
+	// EmitVertex();
+
 	DataOut.texture_coord = vec2(0, 0);
 	gl_Position = m_projView * gl_in[0].gl_Position;
 	EmitVertex();
 
-	DataOut.texture_coord = vec2(0, 1);
+	DataOut.texture_coord = vec2(0, 0);
+	gl_Position = m_projView * DataIn[1].control_point;
+	EmitVertex();
+
+	DataOut.texture_coord = vec2(0, 0);
+	gl_Position = m_projView * gl_in[1].gl_Position;
+	EmitVertex();
+
+	// DataOut.texture_coord = vec2(0, 0);
+	// gl_Position = m_projView * (gl_in[1].gl_Position + DataIn[1].normal);
+	// EmitVertex();
+
+	EndPrimitive();
+
+}
+
+void generateLine () {
+
+	DataOut.texture_coord = vec2(0, 0);
+	gl_Position = m_projView * gl_in[0].gl_Position;
+	EmitVertex();
+
+	DataOut.texture_coord = vec2(0, 0);
 	gl_Position = m_projView * gl_in[1].gl_Position;
 	EmitVertex();
 
@@ -112,6 +148,7 @@ void main()
 
 	generateBladeSegment();
 	//generateBladeLine();
+	//generateLine();
 
 
 }

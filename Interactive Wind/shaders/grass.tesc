@@ -8,6 +8,15 @@ in Data {
 	float blade_height;
     float blade_rotation;
 
+	vec3 up;
+    vec3 direction;
+    vec3 tangent;
+
+	vec4 normal;
+
+	vec4 control_point;
+	vec4 initial_tip;
+
 } DataIn[];
 
 out Data {
@@ -16,17 +25,55 @@ out Data {
 	float blade_height;
     float blade_rotation;
 
+	vec3 up;
+    vec3 direction;
+    vec3 tangent;
+
+	vec4 normal;
+
+	vec4 control_point;
+	vec4 initial_tip;
+
 } DataOut[];
 
 uniform uint bld_levels = 1; // Vertical divisions of each grass blade
 
+uniform float bld_width;            // Width of each grass blade
+uniform float bld_width_var;        // Variation in blade width
+
+uniform float rnd_seed;             // Seed used for variation of the blades
+
 uniform mat4 m_projView;
+
+/////////////////////////////////////////////////////////////////////////////
+// Description: Generic GLSL 1D Noise function							   //	
+// Author: Patricio Gonzalez Vivo										   //	
+// Link: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 //
+/////////////////////////////////////////////////////////////////////////////
+
+float rand(float n) {return fract(sin(n) * 43758.5453123);}
+
+float noise(float p){
+	float fl = floor(p);
+    float fc = fract(p);
+	return mix(rand(fl), rand(fl + 1.0), fc);
+}
+/////////////////////////////////////////////////////////////////////////////
 
 void main() {
 	
 	if (gl_InvocationID == 0) {
 
 		// Frustum Culling
+
+		// Calculating bounding box points
+		float width = bld_width  + (noise(DataIn[0].blade_id * rnd_seed * 2982) - 0.5) * bld_width_var;
+		vec4 p[6] = vec4[6]( gl_in[0].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0),
+					  		 gl_in[0].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0),
+					  		 DataIn[1].control_point - width * 0.5 * vec4(DataIn[0].tangent, 0),
+					  		 DataIn[1].control_point + width * 0.5 * vec4(DataIn[0].tangent, 0),
+					  		 gl_in[1].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0),
+					  		 gl_in[1].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0));
 
 		bool outside = false;
 
@@ -36,7 +83,7 @@ void main() {
 
 			for (int j=0; j<4 && !inside; j++) {
 
-				vec4 pos = m_projView * gl_in[j].gl_Position;
+				vec4 pos = m_projView * p[j];
 
 				switch (i) {
 
@@ -70,7 +117,8 @@ void main() {
 		if (!outside) {
 
 			gl_TessLevelOuter[0] = 1;
-			gl_TessLevelOuter[1] = 1;
+			gl_TessLevelOuter[1] = bld_levels;
+			//gl_TessLevelOuter[1] = 1;
 			
 		// Culling blade
 		} else {
@@ -85,6 +133,15 @@ void main() {
 	DataOut[gl_InvocationID].blade_id = DataIn[gl_InvocationID].blade_id;
 	DataOut[gl_InvocationID].blade_height = DataIn[gl_InvocationID].blade_height;
 	DataOut[gl_InvocationID].blade_rotation = DataIn[gl_InvocationID].blade_rotation;
+
+	DataOut[gl_InvocationID].up = DataIn[1].up;
+	DataOut[gl_InvocationID].direction = DataIn[1].direction;
+	DataOut[gl_InvocationID].tangent = DataIn[1].tangent;
+
+	DataOut[gl_InvocationID].normal = DataIn[1].normal;
+
+	DataOut[gl_InvocationID].control_point = DataIn[1].control_point;
+	DataOut[gl_InvocationID].initial_tip = DataIn[1].initial_tip;
 
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }
