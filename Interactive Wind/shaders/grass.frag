@@ -14,7 +14,10 @@ uniform float rnd_seed;             // Seed used for variation of the blades
 in Data {
 
 	flat int blade_id;
+	
 	vec2 texture_coord;
+
+	vec3 normal;
 
 } DataIn;
 
@@ -57,6 +60,6 @@ void main() {
 	
 	output = tex;
 
-	//output = vec4 (0.0, texture_coord.y * 0.1 + 0.4, 0.0, 1.0);
+	output = vec4 (0.0, texture_coord.y * 0.3 + 0.30, 0.0, 1.0);
 	
 }

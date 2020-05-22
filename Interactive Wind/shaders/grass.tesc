@@ -5,34 +5,22 @@ layout(vertices = 2) out;
 in Data {
 
 	int blade_id;
-	float blade_height;
-    float blade_rotation;
 
 	vec3 up;
-    vec3 direction;
     vec3 tangent;
 
-	vec4 normal;
-
 	vec4 control_point;
-	vec4 initial_tip;
 
 } DataIn[];
 
 out Data {
 
 	int blade_id;
-	float blade_height;
-    float blade_rotation;
 
 	vec3 up;
-    vec3 direction;
     vec3 tangent;
 
-	vec4 normal;
-
 	vec4 control_point;
-	vec4 initial_tip;
 
 } DataOut[];
 
@@ -118,7 +106,6 @@ void main() {
 
 			gl_TessLevelOuter[0] = 1;
 			gl_TessLevelOuter[1] = bld_levels;
-			//gl_TessLevelOuter[1] = 1;
 			
 		// Culling blade
 		} else {
@@ -131,17 +118,11 @@ void main() {
 	}
 
 	DataOut[gl_InvocationID].blade_id = DataIn[gl_InvocationID].blade_id;
-	DataOut[gl_InvocationID].blade_height = DataIn[gl_InvocationID].blade_height;
-	DataOut[gl_InvocationID].blade_rotation = DataIn[gl_InvocationID].blade_rotation;
 
 	DataOut[gl_InvocationID].up = DataIn[1].up;
-	DataOut[gl_InvocationID].direction = DataIn[1].direction;
 	DataOut[gl_InvocationID].tangent = DataIn[1].tangent;
 
-	DataOut[gl_InvocationID].normal = DataIn[1].normal;
-
 	DataOut[gl_InvocationID].control_point = DataIn[1].control_point;
-	DataOut[gl_InvocationID].initial_tip = DataIn[1].initial_tip;
 
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }

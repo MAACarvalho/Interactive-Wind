@@ -6,7 +6,7 @@
 			<!-- Grass Blades -->
 
 			<attribute name="BLADE_LEVELS" 
-				data="INT"  type="RENDERER" value="1" />
+				data="INT"  type="RENDERER" value="10" />
 			<attribute name="BLADE_HEIGHT" 
 				data="FLOAT" type="RENDERER" value="3.0" />
 			<attribute name="BLADE_HEIGHT_VAR" 
@@ -24,13 +24,11 @@
 			<attribute name="BLADE_INCLINATION_VAR" 
 				data="FLOAT" type="RENDERER" value="0.05"/>
 			<attribute name="BLADE_STIFFNESS" 
-				data="FLOAT" type="RENDERER" value="0.0" />
+				data="FLOAT" type="RENDERER" value="0.9" />
 			<attribute name="BLADE_STIFFNESS_VAR" 
 				data="FLOAT" type="RENDERER" value="0.05" />
-			<attribute name="BLADE_STIFFNESS_COMP" 
-				data="FLOAT" type="RENDERER" value="0.05" />
 			<attribute name="BLADE_ROTATION" 
-				data="FLOAT" type="RENDERER" value="0.0" />
+				data="FLOAT" type="RENDERER" value="0.075" />
 			<attribute name="BLADE_ROTATION_VAR" 
 				data="FLOAT" type="RENDERER" value="0.05" />
 			
@@ -100,24 +98,8 @@
 					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
 			</pass>
-			<!-- Grass Normal -->
-			<!-- <pass class="default" name="GrassNormalsPass">
-				<COLOR_CLEAR value = false />
-				<DEPTH_CLEAR value = false />
-				<viewport name="MainViewport" />
-				<camera name="MainCamera" />
-				<scenes instances = 1>
-					<scene name="GrassBladeScene" />
-				</scenes>
-				<lights>
-					<light name="Sun" />
-				</lights>
-				<materialMaps>
-					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassNormalMat" />
-				</materialMaps>
-			</pass> -->
 			<!-- Ground Pass -->
-			<!-- <pass class="default" name="GroundPass" >
+			<pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -131,7 +113,7 @@
 				<materialMaps>
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
 				</materialMaps>
-			</pass> -->
+			</pass>
 			<!-- Axis Pass -->
 			<pass class="default" name="AxissPass" >
 				<COLOR_CLEAR value = false />
@@ -186,9 +168,6 @@
 			
 			<var label="Stiffness Var"  		type="RENDERER" context="CURRENT"  	
 				component="BLADE_STIFFNESS_VAR"  		def="min=0 max=1 step=0.05"/>
-
-			<var label="Stiffness Comp"  		type="RENDERER" context="CURRENT"  	
-				component="BLADE_STIFFNESS_COMP"  		def="min=0 max=1 step=0.05"/>
 
 			<var label="Rotation"	  			type="RENDERER" context="CURRENT"  	
 				component="BLADE_ROTATION"  			def="min=0 max=1 step=0.05"/>

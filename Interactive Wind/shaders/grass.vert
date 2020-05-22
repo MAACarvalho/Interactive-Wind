@@ -7,16 +7,11 @@ in vec4 position;
 out Data {
 
     int blade_id;
-    float blade_height;
-    float blade_rotation;
-
+  
     vec3 up;
-    vec3 direction;
     vec3 tangent;
 
-    vec3 normal;
     vec4 control_point;
-    vec4 initial_tip;
 
 } DataOut;
 
@@ -53,37 +48,54 @@ float noise(float p){
 }
 /////////////////////////////////////////////////////////////////////////////
 
-vec4 transform_tip () {
+vec4 translate (vec4 pos) {
+
+    // Translating & Centering based on instance ID
+    int lines = int(floor(sqrt(instance_count)));
+
+    int x_index = int(floor(gl_InstanceID / lines));
+    int z_index = int(mod(gl_InstanceID, lines));
+
+    float separation = bld_separation + (noise(gl_InstanceID * rnd_seed * 7644) - 0.5) * bld_separation_var;
+
+    pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
+    pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
+
+    return pos;
+
+}
+
+vec4 calculate_tip () {
 
         // Scaling, Rotating & Inclining
-        DataOut.blade_height = bld_height + (noise(gl_InstanceID * rnd_seed * 4751) - 0.5) * bld_height_var;
-        DataOut.blade_rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed * 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
+        float height = bld_height + (noise(gl_InstanceID * rnd_seed * 4751) - 0.5) * bld_height_var;
+        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed * 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
         float inclination = (bld_inclination + (noise (gl_InstanceID * rnd_seed * 8072) - 0.5) * bld_inclination_var) * 0.5 * M_PI;
         
-        DataOut.up = normalize (vec3 (sin(DataOut.blade_rotation) * sin(inclination), 
+        DataOut.up = normalize (vec3 (sin(rotation) * sin(inclination), 
                                       cos(inclination), 
-                                      cos(DataOut.blade_rotation) * sin(inclination)) - vec3(0, 0, 0));
+                                      cos(rotation) * sin(inclination)) - vec3(0, 0, 0));
 
-        DataOut.tangent = normalize (vec3 (cos(DataOut.blade_rotation), 
+        DataOut.tangent = normalize (vec3 (cos(rotation), 
                                            0, 
-                                           - sin(DataOut.blade_rotation)));
+                                           - sin(rotation)));
 
-        DataOut.initial_tip = vec4(vec3(0, 0, 0) + DataOut.blade_height * DataOut.up, 1);
+        vec4 initial_tip = vec4(vec3(0, 0, 0) + height * DataOut.up, 1);
         
-        // Calculating normal vector
-        DataOut.normal = normalize(
-                    vec3(DataOut.blade_height * sin(M_PI + DataOut.blade_rotation) * sin(- M_PI * 0.5 + inclination), 
-                         DataOut.blade_height * cos(M_PI * 0.5 + inclination), 
-                         DataOut.blade_height * cos(M_PI + DataOut.blade_rotation) * sin(- M_PI * 0.5 + inclination)) 
+        // Calculating normal vector to the inclined blade
+        vec3 normal = normalize(
+                    vec3(height * sin(M_PI + rotation) * sin(- M_PI * 0.5 + inclination), 
+                         height * cos(M_PI * 0.5 + inclination), 
+                         height * cos(M_PI + rotation) * sin(- M_PI * 0.5 + inclination)) 
                 -   vec3(0, 0, 0));
 
         // Calculating new tip
-        vec4 tip = DataOut.initial_tip;
+        vec4 tip = initial_tip;
 
         // Applying gravity
         float grass_mass = 1.0f; // Ignoring it for now
         vec3 environment_gravity = grass_mass * (vec3(0, -1, 0) * 9.80665);
-        vec3 front_gravity = 0.25 * length (environment_gravity) * DataOut.normal.xyz;
+        vec3 front_gravity = 0.25 * length (environment_gravity) * normal.xyz;
         
         tip.xyz += (environment_gravity + front_gravity);
 
@@ -92,14 +104,14 @@ vec4 transform_tip () {
 
         // Calculating recovery
         float stiffness = bld_stiffness + (noise(gl_InstanceID * rnd_seed * 4274) - 0.5) * bld_stiffness_var;
-        vec3 recovery = (DataOut.initial_tip.xyz - tip.xyz) * stiffness;
+        vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
 
         tip.xyz += recovery;        
 
         // Calculating control point for Bezier Curve
         float length_proj = length(tip.xyz - vec3(0, 0, 0) - DataOut.up * dot (tip.xyz - vec3(0, 0, 0), DataOut.up));
 
-        DataOut.control_point.xyz = vec3(0, 0, 0) + DataOut.blade_height * DataOut.up * max (1 - length_proj / DataOut.blade_height, 0.05 * max (length_proj / DataOut.blade_height, 1));
+        DataOut.control_point.xyz = vec3(0, 0, 0) + height * DataOut.up * max (1 - length_proj / height, 0.05 * max (length_proj / height, 1));
 
         // Correcting points to ensure blade length is mantained
         vec3 fstSegment = DataOut.control_point.xyz - vec3(0, 0, 0);
@@ -109,31 +121,14 @@ vec4 transform_tip () {
         float L1 = length(fstSegment) + length(sndSegment);
         float bezier_length = (2 * L0 + L1) / 3.0f;
 
-        float ratio = DataOut.blade_height / bezier_length;
+        float ratio = height / bezier_length;
         DataOut.control_point.xyz = vec3(0, 0, 0) + ratio * fstSegment;
         tip.xyz = DataOut.control_point.xyz + ratio * sndSegment;
 
+        // Translating control point as well
+        DataOut.control_point = translate(DataOut.control_point);
+
         return tip;
-
-}
-
-vec4 transform (vec4 pos) {
-
-    // It's tip point
-    if (gl_VertexID == 1) pos = transform_tip();
-
-    // Translating & Centering based on instance ID
-    // int lines = int(floor(sqrt(instance_count)));
-
-    // int x_index = int(floor(gl_InstanceID / lines));
-    // int z_index = int(mod(gl_InstanceID, lines));
-
-    // float separation = bld_separation + (noise(gl_InstanceID * rnd_seed * 7644) - 0.5) * bld_separation_var;
-
-    // pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
-    // pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
-
-    return pos;
 
 }
 
@@ -141,7 +136,12 @@ void main() {
 
     DataOut.blade_id = gl_InstanceID;
 
-    gl_Position = transform(position) * m_model;
+    vec4 pos = position;
+
+    // Transforming tip based on forces and blade properties
+    if (gl_VertexID == 1) pos = calculate_tip ();
+
+    gl_Position = translate(pos) * m_model;
 
 }
 
