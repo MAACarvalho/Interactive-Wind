@@ -4,7 +4,8 @@
 		<attributes>
 
 			<!-- Grass Blades -->
-
+			<attribute name="RND" 
+				data="FLOAT"  type="RENDERER" value="5" />
 			<attribute name="BLADE_LEVELS" 
 				data="INT"  type="RENDERER" value="10" />
 			<attribute name="BLADE_HEIGHT" 
@@ -12,25 +13,25 @@
 			<attribute name="BLADE_HEIGHT_VAR" 
 				data="FLOAT" type="RENDERER" value="0.05" />
 			<attribute name="BLADE_WIDTH"  
-				data="FLOAT" type="RENDERER" value="0.25" />
+				data="FLOAT" type="RENDERER" value="0.05" />
 			<attribute name="BLADE_WIDTH_VAR"  
 				data="FLOAT" type="RENDERER" value="0.05" />
 			<attribute name="BLADE_SEPARATION"  
-				data="FLOAT" type="RENDERER" value="1.25" />
+				data="FLOAT" type="RENDERER" value="0.05" />
 			<attribute name="BLADE_SEPARATION_VAR"  
-				data="FLOAT" type="RENDERER" value="0.25" />
+				data="FLOAT" type="RENDERER" value="0" />
 			<attribute name="BLADE_INCLINATION" 
-				data="FLOAT" type="RENDERER" value="0.2"/>
+				data="FLOAT" type="RENDERER" value="0"/>
 			<attribute name="BLADE_INCLINATION_VAR" 
-				data="FLOAT" type="RENDERER" value="0.05"/>
+				data="FLOAT" type="RENDERER" value="0.604"/>
 			<attribute name="BLADE_STIFFNESS" 
-				data="FLOAT" type="RENDERER" value="0.9" />
+				data="FLOAT" type="RENDERER" value="1" />
 			<attribute name="BLADE_STIFFNESS_VAR" 
-				data="FLOAT" type="RENDERER" value="0.05" />
+				data="FLOAT" type="RENDERER" value="0.07" />
 			<attribute name="BLADE_ROTATION" 
-				data="FLOAT" type="RENDERER" value="0.075" />
+				data="FLOAT" type="RENDERER" value="0.780" />
 			<attribute name="BLADE_ROTATION_VAR" 
-				data="FLOAT" type="RENDERER" value="0.05" />
+				data="FLOAT" type="RENDERER" value="1" />
 			
 			
 			<attribute name="BLADE_RANDOM_SEED" 
@@ -76,6 +77,7 @@
 		</lights>
 
 		<materialLibs>
+			<materialLib filename="materials/wind.mlib" />
 			<materialLib filename="materials/grass.mlib" />
 			<materialLib filename="materials/ground.mlib" />
 		</materialLibs>
@@ -84,11 +86,17 @@
 	
 	<pipelines>
 		<pipeline name="Grass" default="true">
+		
+			<!-- Wind Pass -->
+			<pass class="compute" name="WindPass">
+				<material name="WindMat" fromLibrary="WindLib" dimX=512 dimY=512 dimZ=1 />
+			</pass>
+
 			<!-- Grass Pass -->
 			<pass class="default" name="GrassPass">
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
-				<scenes instances = 1>
+				<scenes instances = 100000>
 					<scene name="GrassBladeScene" />
 				</scenes>
 				<lights>
@@ -98,6 +106,7 @@
 					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
 			</pass>
+
 			<!-- Ground Pass -->
 			<pass class="default" name="GroundPass" >
 				<COLOR_CLEAR value = false />
@@ -135,7 +144,11 @@
 
 		</window>
 		<window label="Grass Blade Properties">
-			
+
+
+			<var label="Random" 				type="RENDERER" context="CURRENT"
+				component="RND" 				def="min=1 max=10 step=0.01"/>
+
 			<var label="Levels" 				type="RENDERER" context="CURRENT"
 				component="BLADE_LEVELS" 				def="min=1 max=64 step=1"/>
 

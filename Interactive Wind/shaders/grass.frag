@@ -44,7 +44,7 @@ void main() {
 	vec2 texture_coord = DataIn.texture_coord;
 
 	// Generating a random number [0,1] with the grass blade original position
-	float random = noise(DataIn.blade_id * rnd_seed * 1235);
+	float random = noise(DataIn.blade_id * rnd_seed + 1235);
 
 	// Choosing random grass blade texture based on the random generated
 	vec4 tex;
@@ -60,6 +60,6 @@ void main() {
 	
 	output = tex;
 
-	output = vec4 (0.0, texture_coord.y * 0.3 + 0.30, 0.0, 1.0);
+	//output = vec4 (0.0, texture_coord.y * 0.3 + 0.30, 0.0, 1.0);
 	
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<materialLib name="WindLib">
+
+	<textures>
+		<texture name="wind">
+			<WIDTH value=512 />
+			<HEIGHT value=512 />
+			<INTERNAL_FORMAT value="RGBA32F" />
+		</texture>
+	</textures>
+
+	<shaders>
+		<shader name="WindShader" 		cs="../shaders/wind.comp" /> 
+	</shaders>
+	
+	<materials>
+		<material name ="WindMat">
+			<shader name="WindShader">
+				<values>	
+					<valueof uniform="timer" 			type="RENDERER" 	 context="CURRENT" component="TIMER" />								
+					<valueof uniform="imageUnit"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
+				</values>
+			</shader>
+			<imageTextures>
+				<imageTexture UNIT=1 texture="wind" >
+					<ACCESS value="READ_WRITE" />
+					<LEVEL value=0 />
+				</imageTexture>
+			</imageTextures>	
+		</material>
+	</materials>
+
+</materialLib>

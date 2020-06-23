@@ -16,6 +16,7 @@
 										tc = "../shaders/ground.tesc"
 										te = "../shaders/ground.tese"
 										ps = "../shaders/ground.frag" />
+
 	</shaders>
 
 	<materials>
@@ -75,9 +76,10 @@
 			</shader>
 			<textures>
 
-				<texture name="ground"  		UNIT = 0 />
+				<texture name="ground"  	UNIT = 0 />
 				
 			</textures>
+
 		</material>
 	</materials>
 </materialLib>

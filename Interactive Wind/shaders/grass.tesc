@@ -55,7 +55,7 @@ void main() {
 		// Frustum Culling
 
 		// Calculating bounding box points
-		float width = bld_width  + (noise(DataIn[0].blade_id * rnd_seed * 2982) - 0.5) * bld_width_var;
+		float width = bld_width  + (noise(DataIn[0].blade_id * rnd_seed + 2982) * 0.5) * bld_width_var;
 		vec4 p[6] = vec4[6]( gl_in[0].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0),
 					  		 gl_in[0].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0),
 					  		 DataIn[1].control_point - width * 0.5 * vec4(DataIn[0].tangent, 0),
@@ -101,19 +101,21 @@ void main() {
 
 		}
 
-		// Tessellating blade 
-		if (!outside) {
-
 			gl_TessLevelOuter[0] = 1;
 			gl_TessLevelOuter[1] = bld_levels;
+		// // Tessellating blade 
+		// if (!outside) {
+
+		// 	gl_TessLevelOuter[0] = 1;
+		// 	gl_TessLevelOuter[1] = bld_levels;
 			
-		// Culling blade
-		} else {
+		// // Culling blade
+		// } else {
 
-			gl_TessLevelOuter[0] = 0;
-			gl_TessLevelOuter[1] = 0;
+		// 	gl_TessLevelOuter[0] = 0;
+		// 	gl_TessLevelOuter[1] = 0;
 
-		}
+		// }
 	
 	}
 

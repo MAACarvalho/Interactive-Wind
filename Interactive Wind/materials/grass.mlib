@@ -12,6 +12,7 @@
 	</textures>
 	
 	<shaders>
+	
 		<shader name="GrassShader" 	vs="../shaders/grass.vert" 
 									tc="../shaders/grass.tesc"
 									te="../shaders/grass.tese"
@@ -20,116 +21,60 @@
 	</shaders>
 	
 	
-	<materials>	
+	<materials>
 		<material name="GrassMat">
 			<shader name="GrassShader">
 				<values>
+
 					<!-- Spaces Matrixes -->
 
-					<valueof uniform="m_projViewModel" 
-							type="RENDERER" context="CURRENT" 
-							component="PROJECTION_VIEW_MODEL" />
-
-					<valueof uniform="m_projView" 
-							type="RENDERER" context="CURRENT" 
-							component="PROJECTION_VIEW" />
-
-					<valueof uniform="m_viewModel" 
-							type="RENDERER" context="CURRENT" 
-							component="VIEW_MODEL" />
-
-					<valueof uniform="m_model" 
-							type="RENDERER" context="CURRENT" 
-							component="MODEL" />
-							 
-					<valueof uniform="m_view" 
-							type="RENDERER" context="CURRENT" 
-							component="VIEW" />
+					<valueof uniform="m_projViewModel" type="RENDERER" context="CURRENT" component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="m_projView" 	   type="RENDERER" context="CURRENT" component="PROJECTION_VIEW" />
+					<valueof uniform="m_viewModel" 	   type="RENDERER" context="CURRENT" component="VIEW_MODEL" />
+					<valueof uniform="m_model" 		   type="RENDERER" context="CURRENT" component="MODEL" />		 
+					<valueof uniform="m_view" 	       type="RENDERER" context="CURRENT" component="VIEW" />
 
 					<!-- Camera -->
 
-					<valueof uniform="camera_pos"
-							 type="CAMERA" context="CURRENT"
-							 component="POSITION" /> 
+					<valueof uniform="camera_pos" type="CAMERA" context="CURRENT" component="POSITION" /> 
 
 					<!-- Scene -->
 
-					<valueof uniform="instance_count" 		type="PASS" context="CURRENT" 
-														component="INSTANCE_COUNT"  />
+					<valueof uniform="instance_count" 		type="PASS" context="CURRENT" component="INSTANCE_COUNT"  />
+					
+					<!-- Timer -->					
+
+					<valueof uniform="timer" type="RENDERER" context="CURRENT" component="TIMER" />
 
 					<!-- Grass Properties -->
 
-					<valueof uniform="bld_levels" 			type="RENDERER" context="CURRENT" 
-														component="BLADE_LEVELS"  />
-
-					<valueof uniform="bld_width"	 		type="RENDERER" context="CURRENT" 
-														component="BLADE_WIDTH"  />
-					
-					<valueof uniform="bld_width_var"	 	type="RENDERER" context="CURRENT" 
-														component="BLADE_WIDTH_VAR"  />
-
-					<valueof uniform="bld_height" 			type="RENDERER" context="CURRENT" 
-														component="BLADE_HEIGHT"  />
-					
-					<valueof uniform="bld_height_var" 		type="RENDERER" context="CURRENT" 
-														component="BLADE_HEIGHT_VAR"  />
-					
-					<valueof uniform="bld_separation" 		type="RENDERER" context="CURRENT" 
-														component="BLADE_SEPARATION"  />
-					
-					<valueof uniform="bld_separation_var" 	type="RENDERER" context="CURRENT" 
-														component="BLADE_SEPARATION_VAR"  />
-
-					<valueof uniform="bld_inclination" 		type="RENDERER" context="CURRENT" 
-														component="BLADE_INCLINATION"  />
-
-					<valueof uniform="bld_inclination_var" 	type="RENDERER" context="CURRENT" 
-														component="BLADE_INCLINATION_VAR"  />
-					
-					<valueof uniform="bld_rotation" 		type="RENDERER" context="CURRENT" 
-														component="BLADE_ROTATION"  />
-
-					<valueof uniform="bld_rotation_var" 	type="RENDERER" context="CURRENT" 
-														component="BLADE_ROTATION_VAR"  />
-
-					<valueof uniform="bld_stiffness" 		type="RENDERER" context="CURRENT" 
-														component="BLADE_STIFFNESS"  />
-
-					<valueof uniform="bld_stiffness_var" 	type="RENDERER" context="CURRENT" 
-														component="BLADE_STIFFNESS_VAR"  />
-
-					<valueof uniform="rnd_seed" 			type="RENDERER" context="CURRENT" 
-														component="BLADE_RANDOM_SEED"  />
+					<valueof uniform="rnd" 					type="RENDERER" context="CURRENT" component="RND"  />
+					<valueof uniform="bld_levels" 			type="RENDERER" context="CURRENT" component="BLADE_LEVELS"  />
+					<valueof uniform="bld_width"	 		type="RENDERER" context="CURRENT" component="BLADE_WIDTH"  />			
+					<valueof uniform="bld_width_var"	 	type="RENDERER" context="CURRENT" component="BLADE_WIDTH_VAR"  />
+					<valueof uniform="bld_height" 			type="RENDERER" context="CURRENT" component="BLADE_HEIGHT"  />					
+					<valueof uniform="bld_height_var" 		type="RENDERER" context="CURRENT" component="BLADE_HEIGHT_VAR"  />					
+					<valueof uniform="bld_separation" 		type="RENDERER" context="CURRENT" component="BLADE_SEPARATION"  />					
+					<valueof uniform="bld_separation_var" 	type="RENDERER" context="CURRENT" component="BLADE_SEPARATION_VAR"  />
+					<valueof uniform="bld_inclination" 		type="RENDERER" context="CURRENT" component="BLADE_INCLINATION"  />
+					<valueof uniform="bld_inclination_var" 	type="RENDERER" context="CURRENT" component="BLADE_INCLINATION_VAR"  />					
+					<valueof uniform="bld_rotation" 		type="RENDERER" context="CURRENT" component="BLADE_ROTATION"  />
+					<valueof uniform="bld_rotation_var" 	type="RENDERER" context="CURRENT" component="BLADE_ROTATION_VAR"  />
+					<valueof uniform="bld_stiffness" 		type="RENDERER" context="CURRENT" component="BLADE_STIFFNESS"  />
+					<valueof uniform="bld_stiffness_var" 	type="RENDERER" context="CURRENT" component="BLADE_STIFFNESS_VAR"  />
+					<valueof uniform="rnd_seed" 			type="RENDERER" context="CURRENT" component="BLADE_RANDOM_SEED"  />
 
 					<!-- Textures -->
 
-					<valueof uniform="bld_tex_1"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=0 />
-					
-					<valueof uniform="bld_tex_2"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=1 />
-
-					<valueof uniform="bld_tex_3"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=2 />
-
-					<valueof uniform="bld_tex_4"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=3 />
-
-					<valueof uniform="bld_tex_5"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=4 />
-
-					<valueof uniform="bld_tex_6"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=5 />
-
-					<valueof uniform="bld_tex_7"
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 component="UNIT" id=6 />
+					<valueof uniform="bld_tex_1" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=0 />					
+					<valueof uniform="bld_tex_2" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=1 />
+					<valueof uniform="bld_tex_3" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=2 />
+					<valueof uniform="bld_tex_4" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=3 />
+					<valueof uniform="bld_tex_5" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=4 />
+					<valueof uniform="bld_tex_6" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=5 />
+					<valueof uniform="bld_tex_7" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=6 />
+				
+					<valueof uniform="wind_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=7 />
 
 				</values>
 			</shader>
@@ -142,8 +87,10 @@
 				<texture name="bld_tex_5"  		UNIT = 4 />
 				<texture name="bld_tex_6"  		UNIT = 5 />
 				<texture name="bld_tex_7"  		UNIT = 6 />
+				<texture name="WindLib::wind"  	UNIT = 7 />
 				
 			</textures>
 		</material>
+
 	</materials>
 </materialLib>

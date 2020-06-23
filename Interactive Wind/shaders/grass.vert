@@ -3,6 +3,7 @@
 #define M_PI 3.1415926535897932384626433832795
 
 in vec4 position;
+in vec2 texCoord;
 
 out Data {
 
@@ -15,6 +16,8 @@ out Data {
 
 } DataOut;
 
+uniform float rnd;  
+
 uniform uint instance_count;
 uniform float bld_height;           // Height of each grass blade
 uniform float bld_height_var;       // Variation in blade height
@@ -26,18 +29,99 @@ uniform float bld_rotation;         // Blade rotation around Y axis
 uniform float bld_rotation_var;     // Variation in blade rotation
 uniform float bld_inclination;      // Blade inclination
 uniform float bld_inclination_var;  // Variation in blade inclination
-uniform float bld_stiffness; 		// Base stiffness of a grass blade
-uniform float bld_stiffness_var; 	// Variation in the stiffness of a grass blade
+uniform float bld_stiffness; 		    // Base stiffness of a grass blade
+uniform float bld_stiffness_var; 	  // Variation in the stiffness of a grass blade
+
 
 uniform float rnd_seed;             // Seed used for variation of the blades
 
 uniform mat4 m_model;
+
+uniform float timer;
+
+uniform sampler2D wind_tex;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Description: Generic GLSL 1D Noise function							   //	
 // Author: Patricio Gonzalez Vivo										   //	
 // Link: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 //
 /////////////////////////////////////////////////////////////////////////////
+
+//	Simplex 3D Noise 
+//	by Ian McEwan, Ashima Arts
+//
+vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+float snoise(vec3 v){ 
+  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+
+  // First corner
+  vec3 i  = floor(v + dot(v, C.yyy) );
+  vec3 x0 =   v - i + dot(i, C.xxx) ;
+
+  // Other corners
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min( g.xyz, l.zxy );
+  vec3 i2 = max( g.xyz, l.zxy );
+
+  //  x0 = x0 - 0. + 0.0 * C 
+  vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+  vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+  vec3 x3 = x0 - 1. + 3.0 * C.xxx;
+
+  // Permutations
+  i = mod(i, 289.0 ); 
+  vec4 p = permute( permute( permute( 
+             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) 
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+
+  // Gradients
+  // ( N*N points uniformly over a square, mapped onto an octahedron.)
+  float n_ = 1.0/7.0; // N=7
+  vec3  ns = n_ * D.wyz - D.xzx;
+
+  vec4 j = p - 49.0 * floor(p * ns.z *ns.z);  //  mod(p,N*N)
+
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)
+
+  vec4 x = x_ *ns.x + ns.yyyy;
+  vec4 y = y_ *ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+
+  vec4 b0 = vec4( x.xy, y.xy );
+  vec4 b1 = vec4( x.zw, y.zw );
+
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+
+  vec3 p0 = vec3(a0.xy,h.x);
+  vec3 p1 = vec3(a0.zw,h.y);
+  vec3 p2 = vec3(a1.xy,h.z);
+  vec3 p3 = vec3(a1.zw,h.w);
+
+  //Normalise gradients
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+
+  // Mix final noise value
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
+                                dot(p2,x2), dot(p3,x3) ) );
+}
+
 
 float rand(float n) {return fract(sin(n) * 43758.5453123);}
 
@@ -56,7 +140,7 @@ vec4 translate (vec4 pos) {
     int x_index = int(floor(gl_InstanceID / lines));
     int z_index = int(mod(gl_InstanceID, lines));
 
-    float separation = bld_separation + (noise(gl_InstanceID * rnd_seed * 7644) - 0.5) * bld_separation_var;
+    float separation = bld_separation + (noise(gl_InstanceID * rnd_seed + 7644) * 0.5) * bld_separation_var;
 
     pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
     pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
@@ -68,9 +152,9 @@ vec4 translate (vec4 pos) {
 vec4 calculate_tip () {
 
         // Scaling, Rotating & Inclining
-        float height = bld_height + (noise(gl_InstanceID * rnd_seed * 4751) - 0.5) * bld_height_var;
-        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed * 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
-        float inclination = (bld_inclination + (noise (gl_InstanceID * rnd_seed * 8072) - 0.5) * bld_inclination_var) * 0.5 * M_PI;
+        float height = bld_height + (noise(gl_InstanceID * rnd_seed + 4751) * 0.5) * bld_height_var;
+        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed + 6153) * 0.5) * bld_rotation_var) * 2 * M_PI;
+        float inclination = (bld_inclination + (noise (gl_InstanceID * rnd_seed + 8072) * 0.5) * bld_inclination_var) * 0.5 * M_PI;
         
         DataOut.up = normalize (vec3 (sin(rotation) * sin(inclination), 
                                       cos(inclination), 
@@ -91,7 +175,7 @@ vec4 calculate_tip () {
 
         // Calculating new tip
         vec4 tip = initial_tip;
-
+        
         // Applying gravity
         float grass_mass = 1.0f; // Ignoring it for now
         vec3 environment_gravity = grass_mass * (vec3(0, -1, 0) * 9.80665);
@@ -99,11 +183,27 @@ vec4 calculate_tip () {
         
         tip.xyz += (environment_gravity + front_gravity);
 
+        vec4 translatedBase = translate( vec4(0,0,0,0) );
+
+        // (p - origin) * 512 / l
+        // where: origin = -l/2,-l/2
         // Applying wind
-        
+        //ivec2 texCoord = ivec2(texCoord0 * 512);
+
+        vec3 global_tip = vec3(translate(tip));
+
+
+
+        vec2 textCoords = (global_tip.xz - vec2(-7.5,-7.5) ) / 15;
+
+        vec4 result = texture(wind_tex, textCoords);
+        tip.xyz += vec3(result.x,result.y,result.z) * result.w;//vec3(0,0,result.x * 100 + 25);
+
+        //tip.xyz += vec3(0,0,snoise( vec3( translatedBase.x / 10  , translatedBase.y / 10  ,  timer / 1000  ) ) * 10 + 25);
+
 
         // Calculating recovery
-        float stiffness = bld_stiffness + (noise(gl_InstanceID * rnd_seed * 4274) - 0.5) * bld_stiffness_var;
+        float stiffness = bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) * 0.5) * bld_stiffness_var;
         vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
 
         tip.xyz += recovery;        
