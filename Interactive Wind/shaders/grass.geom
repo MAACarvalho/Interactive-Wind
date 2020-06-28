@@ -78,7 +78,7 @@ void emitBladeSegment (vec4 p[4], float u[4], float v[4], vec3 n[4]) {
 void generateBladeSegment () {
 
 	// Width Scaling
-    float width = bld_width  + (noise(DataIn[0].blade_id * rnd_seed + 2982) * 0.5) * bld_width_var;
+    float width = max(0, bld_width  + (noise(DataIn[0].blade_id * rnd_seed + 2982) - 0.5) * bld_width_var);
 
 	// Segment points based o width
 	vec4 p0 = gl_in[0].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0);

@@ -3,7 +3,11 @@
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout (binding = 0,rgba32f) uniform image2D imageUnit;
+
 uniform float timer;
+
+uniform vec3 wind_direction;
+uniform float wind_scale;
 
 // Simplex 2D noise
 //
@@ -37,8 +41,11 @@ float snoise(vec2 v){
 }
 
 vec4 random_intensity_fixed_direction() {
-    float value_0 = (snoise(vec2(gl_GlobalInvocationID.x + timer/1000 + 4751, gl_GlobalInvocationID.y + timer/1000 + 4751)) + 1) * 0.5;
-    return vec4(0.5,0,0.5,value_0 * 500);
+
+    float value_0 = snoise(vec2(gl_GlobalInvocationID.x + timer/1000 + 4751, gl_GlobalInvocationID.y + timer/1000 + 4751)) * 0.5 + 0.5;
+
+    return vec4(wind_direction.x * value_0 * wind_scale, wind_direction.y * value_0 * wind_scale, wind_direction.z  * value_0 * wind_scale, 0);
+    
 }
 
 
@@ -47,11 +54,11 @@ void main() {
 
   vec4 stored = imageLoad( imageUnit, storeLoc );
 
-  float value_0 = (snoise(vec2(gl_GlobalInvocationID.x + timer/1000 + 4751, gl_GlobalInvocationID.y + timer/1000 + 4751)) + 1) * 0.5;
-  float value_1 = (snoise(vec2(gl_GlobalInvocationID.x + timer/1000 + 6153, gl_GlobalInvocationID.y + timer/1000 + 6153)) + 1) * 0.5;
-  float value_2 = (snoise(vec2(gl_GlobalInvocationID.x + timer/1000 + 8072, gl_GlobalInvocationID.y + timer/1000 + 8072)) + 1) * 0.5;
-	vec4 res = vec4( value_0,value_1,value_2 , 50 );
+  float value_0 = (snoise(vec2(gl_GlobalInvocationID.x + timer/3000 + 4751, gl_GlobalInvocationID.y + timer/3000 + 4751)) + 1) * 0.5;
+  float value_1 = (snoise(vec2(gl_GlobalInvocationID.x + timer/3000 + 6153, gl_GlobalInvocationID.y + timer/3000 + 6153)) + 1) * 0.5;
+  float value_2 = (snoise(vec2(gl_GlobalInvocationID.x + timer/3000 + 8072, gl_GlobalInvocationID.y + timer/3000 + 8072)) + 1) * 0.5;
+	
+  vec4 wind = random_intensity_fixed_direction();
 
-  vec4 windy = random_intensity_fixed_direction();
-	imageStore(imageUnit, storeLoc, windy);
+	imageStore(imageUnit, storeLoc, wind);
 }

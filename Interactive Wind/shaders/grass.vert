@@ -140,10 +140,14 @@ vec4 translate (vec4 pos) {
     int x_index = int(floor(gl_InstanceID / lines));
     int z_index = int(mod(gl_InstanceID, lines));
 
-    float separation = bld_separation + (noise(gl_InstanceID * rnd_seed + 7644) * 0.5) * bld_separation_var;
+    float separation = bld_separation + (noise(gl_InstanceID * rnd_seed + 7644) - 0.5) * bld_separation_var;
 
-    pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
-    pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
+    if (separation != 0) {
+        
+        pos.x += (x_index - (lines - 1) / 2.0) * (bld_width + separation);
+        pos.z += (z_index - (lines - 1) / 2.0) * (bld_width + separation);
+
+    }
 
     return pos;
 
@@ -152,9 +156,9 @@ vec4 translate (vec4 pos) {
 vec4 calculate_tip () {
 
         // Scaling, Rotating & Inclining
-        float height = bld_height + (noise(gl_InstanceID * rnd_seed + 4751) * 0.5) * bld_height_var;
-        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed + 6153) * 0.5) * bld_rotation_var) * 2 * M_PI;
-        float inclination = (bld_inclination + (noise (gl_InstanceID * rnd_seed + 8072) * 0.5) * bld_inclination_var) * 0.5 * M_PI;
+        float height = max(0, bld_height + (noise(gl_InstanceID * rnd_seed + 4751) - 0.5) * bld_height_var);
+        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed + 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
+        float inclination = min(1, max(0, (bld_inclination + (noise (gl_InstanceID * rnd_seed + 8072) - 0.5) * bld_inclination_var))) * 0.5 * M_PI;
         
         DataOut.up = normalize (vec3 (sin(rotation) * sin(inclination), 
                                       cos(inclination), 
@@ -183,27 +187,28 @@ vec4 calculate_tip () {
         
         tip.xyz += (environment_gravity + front_gravity);
 
-        vec4 translatedBase = translate( vec4(0,0,0,0) );
+        // Getting wind influence for the blade
+        vec4 translated_base = translate(vec4(0,0,0,0));
+        vec4 translated_tip = translate(tip);
+        vec2 wind_coord = (translated_base.xz - vec2(-7.5,-7.5) ) / 15;
 
-        // (p - origin) * 512 / l
-        // where: origin = -l/2,-l/2
+        vec4 wind = texture(wind_tex, wind_coord);
+
         // Applying wind
-        //ivec2 texCoord = ivec2(texCoord0 * 512);
+        if (wind.xyz != vec3(0,0,0)) {
 
-        vec3 global_tip = vec3(translate(tip));
+            float fd = 1 - abs ( dot( normalize(wind.xyz), normalize(translated_tip.xyz - translated_base.xyz)));
+            float fr = dot (translated_tip.xyz - translated_base.xyz, DataOut.up) / height;
+            float theta = fd *  fr;
 
+            vec4 wind_force = wind * theta;
 
-
-        vec2 textCoords = (global_tip.xz - vec2(-7.5,-7.5) ) / 15;
-
-        vec4 result = texture(wind_tex, textCoords);
-        tip.xyz += vec3(result.x,result.y,result.z) * result.w;//vec3(0,0,result.x * 100 + 25);
-
-        //tip.xyz += vec3(0,0,snoise( vec3( translatedBase.x / 10  , translatedBase.y / 10  ,  timer / 1000  ) ) * 10 + 25);
-
+            tip.xyz += vec3(wind_force.x, wind_force.y, wind_force.z);
+            
+        }
 
         // Calculating recovery
-        float stiffness = bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) * 0.5) * bld_stiffness_var;
+        float stiffness = min(1, max(0, bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) - 0.5) * bld_stiffness_var));
         vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
 
         tip.xyz += recovery;        

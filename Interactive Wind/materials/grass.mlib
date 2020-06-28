@@ -48,7 +48,6 @@
 
 					<!-- Grass Properties -->
 
-					<valueof uniform="rnd" 					type="RENDERER" context="CURRENT" component="RND"  />
 					<valueof uniform="bld_levels" 			type="RENDERER" context="CURRENT" component="BLADE_LEVELS"  />
 					<valueof uniform="bld_width"	 		type="RENDERER" context="CURRENT" component="BLADE_WIDTH"  />			
 					<valueof uniform="bld_width_var"	 	type="RENDERER" context="CURRENT" component="BLADE_WIDTH_VAR"  />

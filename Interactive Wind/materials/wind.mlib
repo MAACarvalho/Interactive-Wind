@@ -19,6 +19,9 @@
 				<values>	
 					<valueof uniform="timer" 			type="RENDERER" 	 context="CURRENT" component="TIMER" />								
 					<valueof uniform="imageUnit"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
+
+					<valueof uniform="wind_direction"	type="RENDERER" context="CURRENT" component="WIND_DIR"  />
+					<valueof uniform="wind_scale" 		type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 				</values>
 			</shader>
 			<imageTextures>
