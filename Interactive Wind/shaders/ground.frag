@@ -33,7 +33,7 @@ void main() {
 	// Choosing random grass blade texture based on the random generated
 	vec4 tex = texture (ground, texture_coord);
 	
-	output = tex;
+	output = tex - vec4(0.2, 0.2, 0.2, 0);
 	//output = vec4 (0.30980, 0.22353, 0.14118, 0);
 
 }

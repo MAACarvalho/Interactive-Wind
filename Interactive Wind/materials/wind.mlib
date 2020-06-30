@@ -3,14 +3,16 @@
 
 	<textures>
 		<texture name="wind">
-			<WIDTH value=512 />
-			<HEIGHT value=512 />
+			<WIDTH value=256 />
+			<HEIGHT value=256 />
 			<INTERNAL_FORMAT value="RGBA32F" />
 		</texture>
 	</textures>
 
 	<shaders>
-		<shader name="WindShader" 		cs="../shaders/wind.comp" /> 
+		<shader name="WindShader" 			cs="../shaders/wind.comp" /> 
+		<shader name="ShowWindTexShader" 	vs="../shaders/wind.vert" 
+											ps="../shaders/wind.frag" /> 
 	</shaders>
 	
 	<materials>
@@ -20,8 +22,9 @@
 					<valueof uniform="timer" 			type="RENDERER" 	 context="CURRENT" component="TIMER" />								
 					<valueof uniform="imageUnit"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
 
-					<valueof uniform="wind_direction"	type="RENDERER" context="CURRENT" component="WIND_DIR"  />
-					<valueof uniform="wind_scale" 		type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
+					<valueof uniform="wind_direction"		type="RENDERER" context="CURRENT" component="WIND_DIR"  />
+					<valueof uniform="wind_scale" 			type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
+					<valueof uniform="wind_refresh_rate"	type="RENDERER" context="CURRENT" component="WIND_REFRESH_RATE"  />
 				</values>
 			</shader>
 			<imageTextures>
@@ -29,7 +32,20 @@
 					<ACCESS value="READ_WRITE" />
 					<LEVEL value=0 />
 				</imageTexture>
-			</imageTextures>	
+			</imageTextures>
+		</material>
+		<material name ="ShowWindTexMat">
+			<shader name="ShowWindTexShader">
+				<values>	
+					<valueof uniform="wind_direction"	type="RENDERER" context="CURRENT" component="WIND_DIR"  />
+					<valueof uniform="wind_scale" 		type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
+	
+					<valueof uniform="wind_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=2 />
+				</values>
+			</shader>
+			<textures>
+				<texture name="wind" UNIT=2 />
+			</textures>
 		</material>
 	</materials>
 

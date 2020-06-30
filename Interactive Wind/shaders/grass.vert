@@ -187,14 +187,17 @@ vec4 calculate_tip () {
         
         tip.xyz += (environment_gravity + front_gravity);
 
-        // Getting wind influence for the blade
+        // Translating base & tip in the world
         vec4 translated_base = translate(vec4(0,0,0,0));
         vec4 translated_tip = translate(tip);
-        vec2 wind_coord = (translated_base.xz - vec2(-7.5,-7.5) ) / 15;
 
-        vec4 wind = texture(wind_tex, wind_coord);
-
-        // Applying wind
+        // Calculating texture coordinates & checking wind texture
+        int lines = int(floor(sqrt(instance_count)));
+	    int x_index = int(floor(gl_InstanceID / lines));
+        int z_index = int(mod(gl_InstanceID, lines));
+	    vec4 wind = texture (wind_tex, vec2(x_index/float(lines), z_index/float(lines)));
+    
+        // Applying wind force to the grass
         if (wind.xyz != vec3(0,0,0)) {
 
             float fd = 1 - abs ( dot( normalize(wind.xyz), normalize(translated_tip.xyz - translated_base.xyz)));

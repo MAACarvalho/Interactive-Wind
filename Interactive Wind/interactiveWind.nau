@@ -29,7 +29,7 @@
 			<attribute name="BLADE_ROTATION" 
 				data="FLOAT" type="RENDERER" value="0.0" />
 			<attribute name="BLADE_ROTATION_VAR" 
-				data="FLOAT" type="RENDERER" value="0.335" />
+				data="FLOAT" type="RENDERER" value="1.0" />
 			
 			
 			<attribute name="BLADE_RANDOM_SEED" 
@@ -41,6 +41,8 @@
 				data="VEC3" type="RENDERER" x="1" y="0" z="1" />
 			<attribute name="WIND_SCALE" 
 				data="FLOAT" type="RENDERER" value="1" />
+			<attribute name="WIND_REFRESH_RATE" 
+				data="FLOAT" type="RENDERER" value="5000" />
 			
 		</attributes>
 		
@@ -61,6 +63,11 @@
 		
 		<viewports>
 			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0" g="0" b="0" />
+			</viewport>
+			<viewport name="WindTexViewport" >
+				<ORIGIN x=0.8 y=0.8 />
+				<SIZE width=0.2 height=0.2 />
 				<CLEAR_COLOR r="0" g="0" b="0" />
 			</viewport>
 		</viewports>
@@ -90,11 +97,11 @@
 	</assets>
 	
 	<pipelines>
-		<pipeline name="Grass" default="true">
+		<pipeline name="Grass" default="true" defaultCamera="MainCamera">
 		
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
-				<material name="WindMat" fromLibrary="WindLib" dimX=512 dimY=512 dimZ=1 />
+				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass>
 
 			<!-- Grass Pass -->
@@ -128,6 +135,7 @@
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
 				</materialMaps>
 			</pass>
+
 			<!-- Axis Pass -->
 			<pass class="default" name="AxissPass" >
 				<COLOR_CLEAR value = false />
@@ -137,6 +145,16 @@
 				<scenes>
 					<scene name="AxisScene" />
 				</scenes>	
+			</pass>
+
+			<!-- Wind Tex Pass -->
+
+			<pass class="quad" name="WindTexPass" >
+				<viewport name="WindTexViewport" />
+				<materialMaps>
+					<map fromMaterial="__Quad" 
+						 toLibrary="WindLib" toMaterial="ShowWindTexMat" />
+				</materialMaps>
 			</pass>
 		</pipeline>
 	</pipelines>
@@ -156,6 +174,9 @@
 			
 			<var label="Wind Scale"				type="RENDERER" context="CURRENT"
 				component="WIND_SCALE" 					def="min=0 max=100 step=1"/>
+
+			<var label="Wind Refresh"			type="RENDERER" context="CURRENT"
+				component="WIND_REFRESH_RATE"			def="min=10 max=100000 step=1000"/>
 
 		</window>
 
