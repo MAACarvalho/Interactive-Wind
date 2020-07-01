@@ -16,6 +16,7 @@ uniform float timer;
 uniform vec3 wind_direction;
 uniform float wind_scale;
 uniform float wind_refresh_rate;
+uniform int wind_type;
 
 // Simplex 2D noise
 //
@@ -55,18 +56,26 @@ vec4 random_intensity_fixed_direction() {
     return vec4(wind_direction.x * value * wind_scale, wind_direction.y * value * wind_scale, wind_direction.z  * value * wind_scale, 1.0);
 }
 
+vec4 fixed_intensity_random_direction() {
+
+    float value_0 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751));
+    float value_1 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 6153, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 6153));
+    float value_2 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 8072, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 8072));
+	
+    return vec4 (value_0 * wind_scale, value_1 * wind_scale, value_2 * wind_scale, 1.0);
+
+}
+
 vec4 vortex_polar_to_cartesian (vec4 polar, float radius) {
 
   float versor_theta = 1.0f; // Dunno
   float versor_r = 1.0f; // Dunno 
-  // rever se preciso de adictionar o angulo
-  return vec4( versor_r * radius * cos( polar.y ) , polar.z , versor_theta * radius * sin( polar.y ) , polar.w ); // Fisicamente nao faz sentido porque precisa de multiplicar pelos versores de cada direcao
+  return vec4( versor_r * radius * cos( polar.y ) , polar.z , versor_theta * radius * sin( polar.y ) , polar.w );
 
 }
 
 
 vec4 vortex(float strength, float radius, float angle) {
-
 
     float v_r = 0.0f;
     float v_theta = strength / ( 2.0f * M_PI * radius );
@@ -117,11 +126,11 @@ vec4 sink_source(float strength, float radius, float angle) {
 
 }
 
-vec4 sink_source_effect(){
+vec4 sink_source_effect(int type){
 
     float strength = wind_scale*100 + (snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) + 1)* 0.5 * 1000 * wind_scale; // hard coded
 
-    //strength *= -1;
+    strength *= type;
 
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1,1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
@@ -129,23 +138,11 @@ vec4 sink_source_effect(){
 
     float radius = length(vec2(position_x,position_y));
     float theta = atan( position_y , position_x );
-    //float theta = asin( position_y / radius );
 
     vec4 polar_velocity = sink_source(strength , radius , theta);
 
     return sink_source_polar_to_cartesian(polar_velocity, theta, radius);
 }
-
-
-
-
-vec4 fixed_intensity_random_direction() {
-
-    float value_0 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751));
-    float value_1 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 6153, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 6153));
-    float value_2 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 8072, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 8072));
-	
-    return vec4 (value_0 * wind_scale, value_1 * wind_scale, value_2 * wind_scale, 1.0);}
 
 void main() {
 	ivec2 storeLoc = ivec2(gl_GlobalInvocationID.xy);
@@ -154,10 +151,23 @@ void main() {
 
   vec4 wind;
 
-  //wind = random_intensity_fixed_direction();
-  //wind = fixed_intensity_random_direction();
-  wind = vortex_effect();
-  //wind = sink_source_effect();
+  switch (wind_type) {
+    case 1:
+      wind = random_intensity_fixed_direction();
+      break;
+    case 2:
+      wind = fixed_intensity_random_direction();
+      break;
+    case 3:
+      wind = vortex_effect();
+      break;
+    case 4:
+      wind = sink_source_effect( 1 ); // source
+      break;
+    case 5:
+      wind = sink_source_effect( -1 ); // sink 
+      break;                  
+  } 
 
 
 	imageStore(imageUnit, storeLoc, wind);

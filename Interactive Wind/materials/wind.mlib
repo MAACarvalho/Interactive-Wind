@@ -25,6 +25,7 @@
 					<valueof uniform="wind_direction"		type="RENDERER" context="CURRENT" component="WIND_DIR"  />
 					<valueof uniform="wind_scale" 			type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 					<valueof uniform="wind_refresh_rate"	type="RENDERER" context="CURRENT" component="WIND_REFRESH_RATE"  />
+					<valueof uniform="wind_type"	type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
 				</values>
 			</shader>
 			<imageTextures>
