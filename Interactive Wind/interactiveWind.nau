@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Interactive Wind" width="512" height="512">
+<project name="Interactive Wind" width="1920" height="1080">
 	<assets>
 		<attributes>
 
