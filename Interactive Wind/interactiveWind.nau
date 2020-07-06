@@ -48,6 +48,10 @@
 		</attributes>
 		
 		<scenes>
+			<scene name="ObstacleScene" type="OctreeByMat">
+				<geometry name = "Wall" type = "BOX" material="WallMat">
+				</geometry>
+			</scene>
 			<scene name="GrassBladeScene" type="OctreeByMat">
 				<file name="models/line.patch"/>
 			</scene>
@@ -99,31 +103,9 @@
 	
 	<pipelines>
 		<pipeline name="Grass" default="true" defaultCamera="MainCamera">
-		
-			<!-- Wind Pass -->
-			<pass class="compute" name="WindPass">
-				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
-			</pass>
-
-			<!-- Grass Pass -->
-			<pass class="default" name="GrassPass">
-				<viewport name="MainViewport" />
-				<camera name="MainCamera" />
-				<scenes instances = 100000>
-					<scene name="GrassBladeScene" />
-				</scenes>
-				<lights>
-					<light name="Sun" />
-				</lights>
-				<materialMaps>
-					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
-				</materialMaps>
-			</pass>
 
 			<!-- Ground Pass -->
 			<pass class="default" name="GroundPass" >
-				<COLOR_CLEAR value = false />
-				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
 				<scenes>
@@ -134,6 +116,28 @@
 				</lights>
 				<materialMaps>
 					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- Wind Pass -->
+			<pass class="compute" name="WindPass">
+				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
+			</pass>
+
+			<!-- Grass Pass -->
+			<pass class="default" name="GrassPass">
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes instances = 100000>
+					<scene name="GrassBladeScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
 			</pass>
 
