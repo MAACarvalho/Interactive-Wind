@@ -229,7 +229,7 @@
 			<var label="Random Seed"		  	type="RENDERER" context="CURRENT"  	
 				component="BLADE_RANDOM_SEED"  			def="min=0 max=2 step=0.025"/>
 
-			<var label="Wind Type" type="RENDERER" context="CURRENT" component="WIND_TYPE" strings="direction,intensity,vortex,source,sink"/>
+			<var label="Wind Type" type="RENDERER" context="CURRENT" component="WIND_TYPE" strings="direction,intensity,vortex,source,sink,multi"/>
 			
 <!-- 
 			<var label="Random Dist." type="RENDERER" context="CURRENT"
