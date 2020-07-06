@@ -152,21 +152,25 @@ void main() {
   vec4 wind;
 
   switch (wind_type) {
-    case 1:
+    case 0:
       wind = random_intensity_fixed_direction();
       break;
-    case 2:
+    case 1:
       wind = fixed_intensity_random_direction();
       break;
-    case 3:
+    case 2:
       wind = vortex_effect();
       break;
-    case 4:
+    case 3:
       wind = sink_source_effect( 1 ); // source
       break;
-    case 5:
+    case 4:
       wind = sink_source_effect( -1 ); // sink 
-      break;                  
+      break; 
+    default:
+      wind = fixed_intensity_random_direction();
+      break;
+
   } 
 
 
