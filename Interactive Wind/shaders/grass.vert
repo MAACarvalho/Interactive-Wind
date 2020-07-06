@@ -155,88 +155,88 @@ vec4 translate (vec4 pos) {
 
 vec4 calculate_tip () {
 
-        // Scaling, Rotating & Inclining
-        float height = max(0, bld_height + (noise(gl_InstanceID * rnd_seed + 4751) - 0.5) * bld_height_var);
-        float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed + 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
-        float inclination = min(1, max(0, (bld_inclination + (noise (gl_InstanceID * rnd_seed + 8072) - 0.5) * bld_inclination_var))) * 0.5 * M_PI;
-        
-        DataOut.up = normalize (vec3 (sin(rotation) * sin(inclination), 
-                                      cos(inclination), 
-                                      cos(rotation) * sin(inclination)) - vec3(0, 0, 0));
-
-        DataOut.tangent = normalize (vec3 (cos(rotation), 
-                                           0, 
-                                           - sin(rotation)));
-
-        vec4 initial_tip = vec4(vec3(0, 0, 0) + height * DataOut.up, 1);
-        
-        // Calculating normal vector to the inclined blade
-        vec3 normal = normalize(
-                    vec3(height * sin(M_PI + rotation) * sin(- M_PI * 0.5 + inclination), 
-                         height * cos(M_PI * 0.5 + inclination), 
-                         height * cos(M_PI + rotation) * sin(- M_PI * 0.5 + inclination)) 
-                -   vec3(0, 0, 0));
-
-        // Calculating new tip
-        vec4 tip = initial_tip;
-        
-        // Applying gravity
-        float grass_mass = 1.0f; // Ignoring it for now
-        vec3 environment_gravity = grass_mass * (vec3(0, -1, 0) * 9.80665);
-        vec3 front_gravity = 0.25 * length (environment_gravity) * normal.xyz;
-        
-        tip.xyz += (environment_gravity + front_gravity);
-
-        // Translating base & tip in the world
-        vec4 translated_base = translate(vec4(0,0,0,0));
-        vec4 translated_tip = translate(tip);
-
-        // Calculating texture coordinates & checking wind texture
-        int lines = int(floor(sqrt(instance_count)));
-	    int x_index = int(floor(gl_InstanceID / lines));
-        int z_index = int(mod(gl_InstanceID, lines));
-	    vec4 wind = texture (wind_tex, vec2(x_index/float(lines), z_index/float(lines)));
+    // Scaling, Rotating & Inclining
+    float height = max(0, bld_height + (noise(gl_InstanceID * rnd_seed + 4751) - 0.5) * bld_height_var);
+    float rotation = (bld_rotation + (noise (gl_InstanceID * rnd_seed + 6153) - 0.5) * bld_rotation_var) * 2 * M_PI;
+    float inclination = min(1, max(0, (bld_inclination + (noise (gl_InstanceID * rnd_seed + 8072) - 0.5) * bld_inclination_var))) * 0.5 * M_PI;
     
-        // Applying wind force to the grass
-        if (wind.xyz != vec3(0,0,0)) {
+    DataOut.up = normalize (vec3 (sin(rotation) * sin(inclination), 
+                                  cos(inclination), 
+                                  cos(rotation) * sin(inclination)) - vec3(0, 0, 0));
 
-            float fd = 1 - abs ( dot( normalize(wind.xyz), normalize(translated_tip.xyz - translated_base.xyz)));
-            float fr = dot (translated_tip.xyz - translated_base.xyz, DataOut.up) / height;
-            float theta = fd *  fr;
+    DataOut.tangent = normalize (vec3 (cos(rotation), 
+                                       0, 
+                                       - sin(rotation)));
 
-            vec4 wind_force = wind * theta;
+    vec4 initial_tip = vec4(vec3(0, 0, 0) + height * DataOut.up, 1);
+    
+    // Calculating normal vector to the inclined blade
+    vec3 normal = normalize(
+                vec3(height * sin(M_PI + rotation) * sin(- M_PI * 0.5 + inclination), 
+                     height * cos(M_PI * 0.5 + inclination), 
+                     height * cos(M_PI + rotation) * sin(- M_PI * 0.5 + inclination)) 
+            -   vec3(0, 0, 0));
 
-            tip.xyz += vec3(wind_force.x, wind_force.y, wind_force.z);
-            
-        }
+    // Calculating new tip
+    vec4 tip = initial_tip;
+    
+    // Applying gravity
+    float grass_mass = 1.0f; // Ignoring it for now
+    vec3 environment_gravity = grass_mass * (vec3(0, -1, 0) * 9.80665);
+    vec3 front_gravity = 0.25 * length (environment_gravity) * normal.xyz;
+    
+    tip.xyz += (environment_gravity + front_gravity);
 
-        // Calculating recovery
-        float stiffness = min(1, max(0, bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) - 0.5) * bld_stiffness_var));
-        vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
+    // Translating base & tip in the world
+    vec4 translated_base = translate(vec4(0,0,0,0));
+    vec4 translated_tip = translate(tip);
 
-        tip.xyz += recovery;        
+    // Calculating texture coordinates & checking wind texture
+    int lines = int(floor(sqrt(instance_count)));
+	int x_index = int(floor(gl_InstanceID / lines));
+    int z_index = int(mod(gl_InstanceID, lines));
+	vec4 wind = texture (wind_tex, vec2(x_index/float(lines), z_index/float(lines)));
 
-        // Calculating control point for Bezier Curve
-        float length_proj = length(tip.xyz - vec3(0, 0, 0) - DataOut.up * dot (tip.xyz - vec3(0, 0, 0), DataOut.up));
+    // Applying wind force to the grass
+    if (wind.xyz != vec3(0,0,0)) {
 
-        DataOut.control_point.xyz = vec3(0, 0, 0) + height * DataOut.up * max (1 - length_proj / height, 0.05 * max (length_proj / height, 1));
+        float fd = 1 - abs ( dot( normalize(wind.xyz), normalize(translated_tip.xyz - translated_base.xyz)));
+        float fr = dot (translated_tip.xyz - translated_base.xyz, DataOut.up) / height;
+        float theta = fd *  fr;
 
-        // Correcting points to ensure blade length is mantained
-        vec3 fstSegment = DataOut.control_point.xyz - vec3(0, 0, 0);
-        vec3 sndSegment = tip.xyz - DataOut.control_point.xyz;
+        vec4 wind_force = wind * theta;
 
-        float L0 = length(tip.xyz - vec3(0, 0, 0));
-        float L1 = length(fstSegment) + length(sndSegment);
-        float bezier_length = (2 * L0 + L1) / 3.0f;
+        tip.xyz += vec3(wind_force.x, wind_force.y, wind_force.z);
+        
+    }
 
-        float ratio = height / bezier_length;
-        DataOut.control_point.xyz = vec3(0, 0, 0) + ratio * fstSegment;
-        tip.xyz = DataOut.control_point.xyz + ratio * sndSegment;
+    // Calculating recovery
+    float stiffness = min(1, max(0, bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) - 0.5) * bld_stiffness_var));
+    vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
 
-        // Translating control point as well
-        DataOut.control_point = translate(DataOut.control_point);
+    tip.xyz += recovery;        
 
-        return tip;
+    // Calculating control point for Bezier Curve
+    float length_proj = length(tip.xyz - vec3(0, 0, 0) - DataOut.up * dot (tip.xyz - vec3(0, 0, 0), DataOut.up));
+
+    DataOut.control_point.xyz = vec3(0, 0, 0) + height * DataOut.up * max (1 - length_proj / height, 0.05 * max (length_proj / height, 1));
+
+    // Correcting points to ensure blade length is mantained
+    vec3 fstSegment = DataOut.control_point.xyz - vec3(0, 0, 0);
+    vec3 sndSegment = tip.xyz - DataOut.control_point.xyz;
+
+    float L0 = length(tip.xyz - vec3(0, 0, 0));
+    float L1 = length(fstSegment) + length(sndSegment);
+    float bezier_length = (2 * L0 + L1) / 3.0f;
+
+    float ratio = height / bezier_length;
+    DataOut.control_point.xyz = vec3(0, 0, 0) + ratio * fstSegment;
+    tip.xyz = DataOut.control_point.xyz + ratio * sndSegment;
+
+    // Translating control point as well
+    DataOut.control_point = vec4(translate(DataOut.control_point).xyz, 1);
+
+    return tip;
 
 }
 

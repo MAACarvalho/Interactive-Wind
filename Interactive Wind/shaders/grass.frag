@@ -25,31 +25,6 @@ in Data {
 
 out vec4 output;
 
-
-
-
-
-
-
-
-
-
-
-
-uniform uint instance_count;
-
-
-
-
-
-
-
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Description: Generic GLSL 1D Noise function							   //	
 // Author: Patricio Gonzalez Vivo										   //	
@@ -84,11 +59,6 @@ void main() {
 	else 						tex = texture (bld_tex_7, texture_coord);
 
 	if (tex.a < 0.8f) discard;
-
-	// int lines = int(floor(sqrt(instance_count)));
-	// int x_index = int(floor(DataIn.blade_id / lines));
-    // int z_index = int(mod(DataIn.blade_id, lines));
-	// tex = texture (wind_tex, vec2(x_index/float(lines), z_index/float(lines)));
 
 	output = tex;
 
