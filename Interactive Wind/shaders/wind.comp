@@ -86,18 +86,18 @@ vec4 vortex(float strength, float radius, float angle) {
 
 }
 
-vec4 vortex_effect(){
+vec4 vortex_effect( vec4 wind_position ){
 
     float strength = wind_scale + snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) * 0.5 * wind_scale; // hard coded
-    strength*=100;
+    strength*=1000;
 
 
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1,1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
     float position_y = (pos.y * BOARD_Y / TEX_Y ) - BOARD_Y / 2.0f; // Centering on (0,0)
 
-    float radius = length(vec2(position_x,position_y));
-    float theta = atan( position_x / position_y );
+    float radius = length(vec2(position_x - wind_position.x,position_y - wind_position.y));
+    float theta = atan( position_y - wind_position.y , position_x - wind_position.x );
 
     vec4 polar_velocity = vortex(strength , radius , theta);
 
@@ -126,8 +126,9 @@ vec4 sink_source(float strength, float radius, float angle) {
 
 }
 
-vec4 sink_source_effect(int type){
+vec4 sink_source_effect(int type, vec4 wind_position){
 
+    //float strength = wind_position.w;
     float strength = wind_scale*100 + (snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) + 1)* 0.5 * 1000 * wind_scale; // hard coded
 
     strength *= type;
@@ -136,8 +137,8 @@ vec4 sink_source_effect(int type){
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
     float position_y = (pos.y * BOARD_Y / TEX_Y ) - BOARD_Y / 2.0f; // Centering on (0,0)
 
-    float radius = length(vec2(position_x,position_y));
-    float theta = atan( position_y , position_x );
+    float radius = length(vec2(position_x - wind_position.x,position_y - wind_position.y));
+    float theta = atan( position_y - wind_position.y , position_x - wind_position.x );
 
     vec4 polar_velocity = sink_source(strength , radius , theta);
 
@@ -159,13 +160,19 @@ void main() {
       wind = fixed_intensity_random_direction();
       break;
     case 2:
-      wind = vortex_effect();
+      wind = vortex_effect( vec4(-1,6,0,10) );
       break;
     case 3:
-      wind = sink_source_effect( 1 ); // source
+      wind = sink_source_effect( 1 , vec4(-1,6,0,10)); // source
       break;
     case 4:
-      wind = sink_source_effect( -1 ); // sink 
+      wind = sink_source_effect( -1 , vec4(-3,-3,0,10)); // sink 
+      break; 
+    case 5:
+      wind = sink_source_effect( -1 , vec4(-3,3,0,10)); // sink 
+      //wind += sink_source_effect( 1 , vec4(3,-3,0,10)); // sink 
+      //wind += vortex_effect( vec4(-3,-3,0,10)); // sink 
+      //wind += vortex_effect( vec4(3,3,0,10)); // sink 
       break; 
     default:
       wind = fixed_intensity_random_direction();
