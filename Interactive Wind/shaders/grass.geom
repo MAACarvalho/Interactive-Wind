@@ -110,6 +110,7 @@ void generateBladeLine() {
 	EmitVertex();
 
 	DataOut.texture_coord = vec2(0, 0);
+	DataOut.normal = DataIn[1].normal;
 	gl_Position = m_projView * DataIn[1].control_point;
 	EmitVertex();
 

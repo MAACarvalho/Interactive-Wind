@@ -62,14 +62,14 @@ void main() {
 					  		 DataIn[1].control_point + width * 0.5 * vec4(DataIn[0].tangent, 0),
 					  		 gl_in[1].gl_Position - width * 0.5 * vec4(DataIn[0].tangent, 0),
 					  		 gl_in[1].gl_Position + width * 0.5 * vec4(DataIn[0].tangent, 0));
-
+		
 		bool outside = false;
 
 		for (int i=0; i<6 && !outside; i++) {
 
 			bool inside = false;
 
-			for (int j=0; j<4 && !inside; j++) {
+			for (int j=0; j<6 && !inside; j++) {
 
 				vec4 pos = m_projView * p[j];
 
@@ -101,22 +101,19 @@ void main() {
 
 		}
 
-		gl_TessLevelOuter[0] = 1;
-		gl_TessLevelOuter[1] = bld_levels;
-		
 		// Tessellating blade 
-		// if (!outside) {
+		if (!outside) {
 
-		// 	gl_TessLevelOuter[0] = 1;
-		// 	gl_TessLevelOuter[1] = bld_levels;
+			gl_TessLevelOuter[0] = 1;
+			gl_TessLevelOuter[1] = bld_levels;
 			
-		// // Culling blade
-		// } else {
+		// Culling blade
+		} else {
 
-		// 	gl_TessLevelOuter[0] = 0;
-		// 	gl_TessLevelOuter[1] = 0;
+			gl_TessLevelOuter[0] = 0;
+			gl_TessLevelOuter[1] = 0;
 
-		// }
+		}
 	
 	}
 
