@@ -6,7 +6,6 @@
 #define TEX_X 256
 #define TEX_Y 256
 
-
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout (binding = 0, rgba32f) uniform image2D imageUnit;
@@ -17,6 +16,11 @@ uniform vec3 wind_direction;
 uniform float wind_scale;
 uniform float wind_refresh_rate;
 uniform int wind_type;
+
+uniform int octaves;
+uniform float lacunarity;
+uniform float persistence;
+uniform float var_per;
 
 // Simplex 2D noise
 //
@@ -49,31 +53,32 @@ float snoise (vec2 v){
   return 130.0 * dot(m, g);
 }
 
+float noise_octaves(vec2 pos) {
+
+    float result = 0.0f, freq = 1.0f, amp = 1.0f;
+
+		for (int  i = 0; i < octaves; i++ , freq *= lacunarity, amp *= persistence )
+			result += snoise(freq * pos) * amp;
+
+    return result;
+}
+
 vec4 random_intensity_fixed_direction() {
 
-    float value = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) * 0.5 + 0.5;
+    float value = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) * 0.5 + 0.5;
 
     return vec4(wind_direction.x * value * wind_scale, wind_direction.y * value * wind_scale, wind_direction.z  * value * wind_scale, 1.0);
 }
 
 vec4 fixed_intensity_random_direction() {
 
-    float value_0 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751));
-    float value_1 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 6153, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 6153));
-    float value_2 = snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 8072, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 8072));
+    float value_0 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751));
+    float value_1 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 6153, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 6153));
+    float value_2 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 8072, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 8072));
 	
     return vec4 (value_0 * wind_scale, value_1 * wind_scale, value_2 * wind_scale, 1.0);
 
 }
-
-vec4 vortex_polar_to_cartesian (vec4 polar, float radius) {
-
-  float versor_theta = 1.0f; // Dunno
-  float versor_r = 1.0f; // Dunno 
-  return vec4( versor_r * radius * cos( polar.y ) , polar.z , versor_theta * radius * sin( polar.y ) , polar.w );
-
-}
-
 
 vec4 vortex(float strength, float radius, float angle) {
 
@@ -88,34 +93,28 @@ vec4 vortex(float strength, float radius, float angle) {
 
 vec4 vortex_effect( vec4 wind_position ){
 
-    float strength = wind_scale + snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) * 0.5 * wind_scale; // hard coded
-    strength*=1000;
-
-
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1,1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
     float position_y = (pos.y * BOARD_Y / TEX_Y ) - BOARD_Y / 2.0f; // Centering on (0,0)
 
-    float radius = length(vec2(position_x - wind_position.x,position_y - wind_position.y));
+    float radius = length(vec2(position_x - wind_position.x, position_y - wind_position.y));
     float theta = atan( position_y - wind_position.y , position_x - wind_position.x );
 
-    vec4 polar_velocity = vortex(strength , radius , theta);
+    vec4 polar_velocity = vortex(1, radius, theta);
 
-    return vortex_polar_to_cartesian(polar_velocity, radius);
-}
+	float new_radius = radius + polar_velocity.x;
+	float new_theta  = theta + polar_velocity.y;
 
+	float new_position_x = new_radius * cos (new_theta) + wind_position.x;
+	float new_position_y = new_radius * sin (new_theta) + wind_position.y;
 
-vec4 sink_source_polar_to_cartesian (vec4 polar, float theta , float radius ) {
+    float strength = wind_scale * (1 + snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer / wind_refresh_rate + 4751)) * 0.5); 
 
-  float versor_theta = 1.0f; // Dunno
-  float versor_r = 1.0f; // Dunno 
-  return vec4( polar.x  * cos( theta ) , polar.z , polar.x  * sin( theta ) , polar.w ); // Fisicamente nao faz sentido porque precisa de multiplicar pelos versores de cada direcao
-
+	return strength * (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
 }
 
 
 vec4 sink_source(float strength, float radius, float angle) {
-
 
     float v_r = strength / ( 2.0f * M_PI * radius );
     float v_theta = 0.0f;
@@ -128,10 +127,40 @@ vec4 sink_source(float strength, float radius, float angle) {
 
 vec4 sink_source_effect(int type, vec4 wind_position){
 
-    //float strength = wind_position.w;
-    float strength = wind_scale*100 + (snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) + 1)* 0.5 * 1000 * wind_scale; // hard coded
+    vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1, 1);
+    float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
+    float position_y = (pos.y * BOARD_Y / TEX_Y ) - BOARD_Y / 2.0f; // Centering on (0,0)
 
-    strength *= type;
+    float radius = length(vec2(position_x - wind_position.x, position_y - wind_position.y));
+    float theta = atan(position_y - wind_position.y, position_x - wind_position.x );
+
+    vec4 polar_velocity = sink_source(type * 5, radius , theta);
+
+	float new_radius = radius + polar_velocity.x;
+	float new_theta  = theta + polar_velocity.y;
+
+	float new_position_x = new_radius * cos (new_theta) + wind_position.x;
+	float new_position_y = new_radius * sin (new_theta) + wind_position.y;
+
+    float strength = wind_scale + (snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer / wind_refresh_rate + 4751)) + 1) * 0.5 * wind_scale; // hard coded
+
+	return strength * (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
+
+}
+
+vec4 heli_polar_to_cartesian (vec4 polar, float radius, float theta) {
+
+  return vec4( polar.x * sin( theta + polar.y ) * -1 + (radius - polar.x)  * cos( polar.y ),
+               polar.z ,
+               polar.x * cos( theta + polar.y )      + (radius - polar.x)  * sin( polar.y ),
+               polar.w );
+
+}
+
+vec4 heli_effect( vec4 wind_position ){
+
+    float strength = wind_scale + noise_octaves(vec2(timer/wind_refresh_rate, timer/wind_refresh_rate)) * var_per * wind_scale;
+    strength*=10;
 
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1,1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
@@ -140,45 +169,73 @@ vec4 sink_source_effect(int type, vec4 wind_position){
     float radius = length(vec2(position_x - wind_position.x,position_y - wind_position.y));
     float theta = atan( position_y - wind_position.y , position_x - wind_position.x );
 
-    vec4 polar_velocity = sink_source(strength , radius , theta);
+    vec4 polar_velocity = vortex(strength , radius , theta);
 
-    return sink_source_polar_to_cartesian(polar_velocity, theta, radius);
+    return heli_polar_to_cartesian(polar_velocity, radius, theta);
 }
 
 void main() {
+
 	ivec2 storeLoc = ivec2(gl_GlobalInvocationID.xy);
 
-  vec4 stored = imageLoad( imageUnit, storeLoc );
+	vec4 stored = imageLoad( imageUnit, storeLoc );
 
-  vec4 wind;
+	vec4 wind;
 
-  switch (wind_type) {
-    case 0:
-      wind = random_intensity_fixed_direction();
-      break;
-    case 1:
-      wind = fixed_intensity_random_direction();
-      break;
-    case 2:
-      wind = vortex_effect( vec4(-1,6,0,10) );
-      break;
-    case 3:
-      wind = sink_source_effect( 1 , vec4(-1,6,0,10)); // source
-      break;
-    case 4:
-      wind = sink_source_effect( -1 , vec4(-3,-3,0,10)); // sink 
-      break; 
-    case 5:
-      wind = sink_source_effect( -1 , vec4(-3,3,0,10)); // sink 
-      //wind += sink_source_effect( 1 , vec4(3,-3,0,10)); // sink 
-      //wind += vortex_effect( vec4(-3,-3,0,10)); // sink 
-      //wind += vortex_effect( vec4(3,3,0,10)); // sink 
-      break; 
-    default:
-      wind = fixed_intensity_random_direction();
-      break;
+	switch (wind_type) {
+		
+		case 0:
+			
+			wind = random_intensity_fixed_direction();
+			break;
+		
+		case 1:
 
-  } 
+			wind = fixed_intensity_random_direction();
+			break;
+
+		case 2:
+
+			wind = vortex_effect( vec4(-1,-2,0,10) );
+			break;
+
+		case 3:
+
+			wind = sink_source_effect( -1 , vec4(-1,6,0,10)); // source
+			break;
+
+		case 4:
+
+			wind = sink_source_effect( 1 , vec4(-3,-3,0,10)); // sink 
+			break; 
+
+		case 5:
+
+			wind = heli_effect ( vec4(0, 0, 0, 1));
+			break;
+
+		case 6:
+
+			wind = random_intensity_fixed_direction();
+			//wind += sink_source_effect( -1 , vec4(-3,3,0,10)); // sink 
+			//for (int i=0; i<9; i++) {
+				//wind += sink_source_effect( -1 , vec4(-1 + 0.2 * i, -2.5, 0, 10)) * 0.1; // source 
+			//}
+			wind += vortex_effect(vec4(0, 0, 0, 1)); // vortex 
+			break; 
+		
+		case 7:
+
+			wind = random_intensity_fixed_direction();
+			for (int i=0; i<9; i++) wind += sink_source_effect(-1 , vec4(-1 + 0.2 * i, -2.5, 0, 10)); // source 
+			break; 
+
+		default:
+
+			wind = fixed_intensity_random_direction();
+			break;
+
+	} 
 
 
 	imageStore(imageUnit, storeLoc, wind);

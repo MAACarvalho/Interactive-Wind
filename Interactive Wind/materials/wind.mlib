@@ -26,6 +26,11 @@
 					<valueof uniform="wind_scale" 			type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 					<valueof uniform="wind_refresh_rate"	type="RENDERER" context="CURRENT" component="WIND_REFRESH_RATE"  />
 					<valueof uniform="wind_type"	type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
+
+					<valueof uniform="octaves"				type="RENDERER" 	context="CURRENT" component="OCTAVES"  />
+					<valueof uniform="lacunarity"			type="RENDERER" 	context="CURRENT" component="LACUNARITY"  />
+					<valueof uniform="persistence"			type="RENDERER" 	context="CURRENT" component="PERSISTENCE"  />
+					<valueof uniform="var_per"				type="RENDERER" 	context="CURRENT" component="VAR_PER"  />
 				</values>
 			</shader>
 			<imageTextures>

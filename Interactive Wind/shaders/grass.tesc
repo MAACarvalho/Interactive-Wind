@@ -102,18 +102,18 @@ void main() {
 		}
 
 		// Tessellating blade 
-		if (!outside) {
+		//if (!outside) {
 
 			gl_TessLevelOuter[0] = 1;
 			gl_TessLevelOuter[1] = bld_levels;
 			
 		// Culling blade
-		} else {
+		// } else {
 
-			gl_TessLevelOuter[0] = 0;
-			gl_TessLevelOuter[1] = 0;
+		// 	gl_TessLevelOuter[0] = 0;
+		// 	gl_TessLevelOuter[1] = 0;
 
-		}
+		// }
 	
 	}
 
