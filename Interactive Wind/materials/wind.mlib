@@ -16,6 +16,7 @@
 	</shaders>
 	
 	<materials>
+		<!-- CALCULATE WIND -->
 		<material name ="WindMat">
 			<shader name="WindShader">
 				<values>	
@@ -40,6 +41,7 @@
 				</imageTexture>
 			</imageTextures>
 		</material>
+		<!-- SHOW WIND IN VIEWPORT -->
 		<material name ="ShowWindTexMat">
 			<shader name="ShowWindTexShader">
 				<values>	
