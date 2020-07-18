@@ -249,7 +249,7 @@ void main() {
     // Transforming tip based on forces and blade properties
     if (gl_VertexID == 1) pos = calculate_tip ();
 
-    gl_Position = translate(pos) * m_model;
+    gl_Position = m_model * translate(pos);
 
 }
 

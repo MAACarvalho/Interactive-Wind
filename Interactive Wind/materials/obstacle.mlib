@@ -16,12 +16,20 @@
 			<HEIGHT value=256 />
 			<INTERNAL_FORMAT value="RGBA32F" />
 		</texture>
+		<texture name="obstacleTex">
+			<WIDTH value=256 />
+			<HEIGHT value=256 />
+			<INTERNAL_FORMAT value="RGBA32F" />
+		</texture>
 	</textures>
 
 	<shaders>
+		<shader name="ObstacleNormalsShader" 	vs="../shaders/obstacleNormals.vert" 
+												gs="../shaders/obstacleNormals.geom"
+												ps="../shaders/obstacleNormals.frag" /> 
 		<shader name="ObstacleShader" 			vs="../shaders/obstacle.vert" 
 												gs="../shaders/obstacle.geom"
-												ps="../shaders/obstacle.frag" /> 
+												ps="../shaders/obstacle.frag" /> 												
 		<shader name="ShowObstacleTexShader" 	vs="../shaders/obstacleTex.vert" 
 												ps="../shaders/obstacleTex.frag" /> 												
 	</shaders>
@@ -34,6 +42,7 @@
 	</states>
 
 	<materials>
+		
 		<material name ="ObstacleMat">
 			<shader name="ObstacleShader">
 				<values>	
@@ -41,7 +50,32 @@
 					<!-- Spaces Matrixes -->
 
 					<valueof uniform="m_model" 		   	type="RENDERER" context="CURRENT" 	component="MODEL" />		 
-					<valueof uniform="m_projView_test" 	type="RENDERER" context="CURRENT" 	component="PROJECTION_VIEW" />
+					<valueof uniform="m_projView_camY"	type="CAMERA"	context="CameraY"	component="PROJECTION_VIEW_MATRIX" />
+
+					<!-- Texture Matrixes -->
+
+					<valueof uniform="imageUnit"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
+
+				</values>
+			</shader>
+			<imageTextures>
+				<imageTexture UNIT=1 texture="obstacleTex" >
+					<ACCESS value="READ_WRITE" />
+					<LEVEL value=0 />
+					<!-- <CLEAR value="true" /> -->
+					<!-- <INTERNAL_FORMAT value="RGBA32F" /> -->
+				</imageTexture>
+			</imageTextures>
+			<state name="voxelization" />
+		</material>
+
+		<material name ="ObstacleNormalsMat">
+			<shader name="ObstacleNormalsShader">
+				<values>	
+					
+					<!-- Spaces Matrixes -->
+
+					<valueof uniform="m_model" 		   	type="RENDERER" context="CURRENT" 	component="MODEL" />		 
 					<valueof uniform="m_projView_camX"	type="CAMERA"	context="CameraX"	component="PROJECTION_VIEW_MATRIX" />
 					<valueof uniform="m_projView_camZ"	type="CAMERA"	context="CameraZ"	component="PROJECTION_VIEW_MATRIX" />
 
@@ -65,11 +99,12 @@
 		<material name ="ShowObstacleTexMat">
 			<shader name="ShowObstacleTexShader">
 				<values>	
-					<valueof uniform="tex"  			type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=2 />
+					<valueof uniform="tex" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=1 />
 				</values>
 			</shader>
 			<textures>
-				<texture name="obstacleNormalsTex" UNIT=2 />
+				<texture name="obstacleNormalsTex" UNIT=1 />
+				<!-- <texture name="obstacleTex" UNIT=1 /> -->
 			</textures>
 		</material>
 	</materials>

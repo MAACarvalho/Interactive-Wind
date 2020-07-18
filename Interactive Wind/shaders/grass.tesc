@@ -31,6 +31,8 @@ uniform float bld_width_var;        // Variation in blade width
 
 uniform float rnd_seed;             // Seed used for variation of the blades
 
+uniform sampler2D obstacle_tex;
+
 uniform mat4 m_projView;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,19 +103,34 @@ void main() {
 
 		}
 
-		// Tessellating blade 
-		//if (!outside) {
+		vec2 texPos = vec2((gl_in[0].gl_Position.xz + 15.0) / 30.0);
+
+		if (texture(obstacle_tex, texPos) == vec4 (1.0, 1.0, 1.0, 1.0)
+		 	|| gl_in[0].gl_Position.x < -15.0
+			|| gl_in[0].gl_Position.x > 15.0
+			|| gl_in[0].gl_Position.z < -15.0
+			|| gl_in[0].gl_Position.z > 15.0) {
+
+			gl_TessLevelOuter[0] = 0;
+			gl_TessLevelOuter[1] = 0;
+			
+		} else {
+
+			// Tessellating blade 
+			//if (!outside) {
 
 			gl_TessLevelOuter[0] = 1;
 			gl_TessLevelOuter[1] = bld_levels;
-			
-		// Culling blade
-		// } else {
+				
+			// Culling blade
+			// } else {
 
-		// 	gl_TessLevelOuter[0] = 0;
-		// 	gl_TessLevelOuter[1] = 0;
+			// 	gl_TessLevelOuter[0] = 0;
+			// 	gl_TessLevelOuter[1] = 0;
 
-		// }
+			// }
+
+		}
 	
 	}
 

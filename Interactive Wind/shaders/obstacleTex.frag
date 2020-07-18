@@ -11,8 +11,6 @@ void main()
 
 	vec4 text = texture(tex, texCoord.xy);
 
-	//outColor = vec4(float(tex.x) / wind_scale / wind_direction.x, float(tex.y) / wind_scale / wind_direction.y, float(tex.z) / wind_scale / wind_direction.z, 1.0);
-
 	outColor = vec4(float(text.x), float(text.y), float(text.z), 1.0);
 
 }

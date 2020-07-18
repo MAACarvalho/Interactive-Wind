@@ -90,7 +90,7 @@
 				<CLEAR_COLOR r="0" g="1" b="0" />
 			</viewport>
 			<viewport name="Grid">
-				<ORIGIN x=0.8 y=0 />
+				<!-- <ORIGIN x=0.8 y=0 /> -->
 				<SIZE width=256 height=256 />
 				<CLEAR_COLOR r="0.0" g="1.0" b="0.0"/>
 			</viewport>
@@ -106,14 +106,21 @@
 			</camera>
 			<camera name="CameraX">
 				<viewport name="Grid" />
-				<projection TYPE="ORTHO"  NEAR=-1 FAR=1 LEFT=-1 RIGHT=1 BOTTOM=-1 TOP=1 />
-				<POSITION x=0 y=0.5 z=0.0 />
+				<projection TYPE="ORTHO"  NEAR=-15 FAR=15 LEFT=-15 RIGHT=15 />
+				<POSITION x=0.0 y=0.5 z=0.0 />
 				<VIEW x=1.0 y=0.0 z=0.0 />
 				<UP x=0 y=1 z=0 />
 			</camera>
+			<camera name="CameraY">
+				<viewport name="Grid" />
+				<projection TYPE="ORTHO"  NEAR=-1 FAR=1 LEFT=-15 RIGHT=15 BOTTOM=-15 TOP=15/>
+				<POSITION x=0.0 y=0.0 z=0.0 />
+				<VIEW x=0.0 y=1.0 z=0.0 />
+				<UP x=0 y=0 z=1 />
+			</camera>
 			<camera name="CameraZ">
 				<viewport name="Grid" />
-				<projection TYPE="ORTHO"  NEAR=-1 FAR=1 LEFT=-1 RIGHT=1 BOTTOM=-1 TOP=1 />
+				<projection TYPE="ORTHO"  NEAR=-15 FAR=15 LEFT=-15 RIGHT=15 />
 				<POSITION x=0 y=0.5 z=0.0 />
 				<VIEW x=0.0 y=0.0 z=1.0 />
 				<UP x=0 y=1 z=0 />
@@ -127,10 +134,10 @@
 		</lights>
 
 		<materialLibs>
+			<materialLib filename="materials/obstacle.mlib" />
 			<materialLib filename="materials/wind.mlib" />
 			<materialLib filename="materials/grass.mlib" />
 			<materialLib filename="materials/ground.mlib" />
-			<materialLib filename="materials/obstacle.mlib" />
 		</materialLibs>
 		
 	</assets>
@@ -168,9 +175,10 @@
 					<light name="Sun" />
 				</lights>
 			</pass>
-
-			<pass class="default" name="StoreObstaclePass">
-				<!-- <mode value="RUN_ONCE" /> -->
+			
+			<!-- Store Obstacle Location Pass -->
+			<pass class="default" name="StoreObstacleLocationPass">
+				<mode value="RUN_ONCE" />
 				
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -184,38 +192,52 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-				<!-- <injectionMaps>
-					<map toMaterial="WallMat">
-						<shader fromMaterial ="ObstacleMat" fromLibrary="ObstacleLib" />
-						<state name="voxelization" fromLibrary="ObstacleLib" />
-						<imageTextures>
-							<imageTexture texture="obstacleNormalsTex" fromLibrary="ObstacleLib" toUnit=1 />
-						</imageTextures>
-					</map>
-				</injectionMaps> -->
+				<viewport name="Grid" />
 				<renderTarget name="DummyRenderTarget" fromLibrary="ObstacleLib" />
 				<materialMaps>
 					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleMat" />
 				</materialMaps>
 			</pass>
 
-			<!-- -Obstacle Tex Pass -->
+			<!-- Store Obstacle Normals Pass -->
+			<pass class="default" name="StoreObstacleNormalsPass">
+				<mode value="RUN_ONCE" />
+				
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<COLOR_ENABLE value = false />
+				<DEPTH_MASK value = false />
+				<DEPTH_ENABLE value = false />
 
-			<pass class="quad" name="ObstacleTexPass" >
+				<scenes>
+					<scene name="ObstacleScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<viewport name="Grid" />
+				<renderTarget name="DummyRenderTarget" fromLibrary="ObstacleLib" />
+				<materialMaps>
+					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleNormalsMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- -Obstacle Tex Pass -->
+			<!-- <pass class="quad" name="ObstacleTexPass" >
 				<viewport name="ObstacleTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="ObstacleLib" toMaterial="ShowObstacleTexMat" />
 				</materialMaps>
-			</pass>
-
-			<!-- Wind Pass -->
-			<!-- <pass class="compute" name="WindPass">
-				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass> -->
 
+			<!-- Wind Pass -->
+			<pass class="compute" name="WindPass">
+				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
+			</pass>
+
 			<!-- Grass Pass -->
-			<!-- <pass class="default" name="GrassPass">
+			<pass class="default" name="GrassPass">
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -229,7 +251,7 @@
 				<materialMaps>
 					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
 				</materialMaps>
-			</pass> -->
+			</pass>
 
 			<!-- Axis Pass -->
 			<pass class="default" name="AxisPass" >

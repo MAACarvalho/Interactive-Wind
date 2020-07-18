@@ -3,7 +3,8 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices=3) out;
 
-uniform mat4 m_projView_camY;
+uniform mat4 m_projView_camX;
+uniform mat4 m_projView_camZ;
 
 in Data {
 
@@ -24,7 +25,19 @@ out Data {
 void main()
 {
 
-	mat4 m_projView = m_projView_camY;
+	// Calculate triangle normal
+	vec4 v1 = gl_in[1].gl_Position - gl_in[0].gl_Position;
+	vec4 v2 = gl_in[2].gl_Position - gl_in[0].gl_Position;
+	
+	vec3 normal = abs(cross(v1.xyz, v2.xyz));
+
+	// Set the projection view matrix by choosing the camera that better "sees" the object
+	float m = max(normal.x, normal.z);
+
+	mat4 m_projView;
+
+	if (m == normal.x) m_projView = m_projView_camX;
+	else m_projView = m_projView_camZ;
 
 	// Should expand triangle here
 	

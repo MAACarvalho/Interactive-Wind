@@ -75,19 +75,24 @@
 				
 					<valueof uniform="wind_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=7 />
 
+					<valueof uniform="obstacle_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=8 />
+
 				</values>
 			</shader>
 			<textures>
 
-				<texture name="bld_tex_1"  		UNIT = 0 />
-				<texture name="bld_tex_2"  		UNIT = 1 />
-				<texture name="bld_tex_3"  		UNIT = 2 />
-				<texture name="bld_tex_4"  		UNIT = 3 />
-				<texture name="bld_tex_5"  		UNIT = 4 />
-				<texture name="bld_tex_6"  		UNIT = 5 />
-				<texture name="bld_tex_7"  		UNIT = 6 />
+				<texture name="bld_tex_1" UNIT = 0 />
+				<texture name="bld_tex_2" UNIT = 1 />
+				<texture name="bld_tex_3" UNIT = 2 />
+				<texture name="bld_tex_4" UNIT = 3 />
+				<texture name="bld_tex_5" UNIT = 4 />
+				<texture name="bld_tex_6" UNIT = 5 />
+				<texture name="bld_tex_7" UNIT = 6 />
+
 				<texture name="WindLib::wind"  	UNIT = 7 />
-				
+
+				<texture name="ObstacleLib::obstacleTex"  	UNIT = 8 />
+
 			</textures>
 		</material>
 
