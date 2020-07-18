@@ -9,6 +9,7 @@
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout (binding = 0, rgba32f) uniform image2D imageUnit;
+uniform sampler2D wind_texture;
 
 uniform float timer;
 
@@ -180,7 +181,10 @@ void main() {
 
 	vec4 stored = imageLoad( imageUnit, storeLoc );
 
-	vec4 wind;
+	vec4 wind = vec4(0,0,0,0);
+    int i;
+    vec4 holder;
+    bool done;
 
 	switch (wind_type) {
 		
@@ -230,6 +234,67 @@ void main() {
 			for (int i=0; i<9; i++) wind += sink_source_effect(-1 , vec4(-1 + 0.2 * i, -2.5, 0, 10)); // source 
 			break; 
 
+        case 8:
+            // Constant, todo
+            for (i=99, done = true; i >= 0 && done; i--) {
+                holder = texelFetch (wind_texture , ivec2(0 , i), 0);
+                if(holder.w == 0)
+                    done = false;
+                else
+                    wind += random_intensity_fixed_direction();;
+            }
+
+            for (i=99, done = true; i >= 0 && done; i--) {
+                // linha coluna
+                    holder = texelFetch (wind_texture , ivec2(1 , i ) , 0);
+
+                    if(holder.w == 0)
+                        done = false;
+                    else {
+                        holder.x = (holder.x * 15) - 7.5;
+                        holder.y = (holder.y * 15) - 7.5;
+                        holder.z = (holder.z * 15) - 7.5;
+                        holder.w = 50;
+
+                        wind += vortex_effect( holder );
+                }
+            }
+
+            for (i=99, done = true; i >= 0 && done; i--) {
+                // linha coluna
+                    holder = texelFetch (wind_texture , ivec2(2 , i ) , 0);
+
+                    if(holder.w == 0)
+                        done = false;
+                    else {
+                        holder.x = (holder.x * 15) - 7.5;
+                        holder.y = (holder.y * 15) - 7.5;
+                        holder.z = (holder.z * 15) - 7.5;
+                        holder.w = 50;
+
+                        wind += sink_source_effect( 1, holder );
+                    
+                }
+            }
+
+            for (i=99, done = true; i >= 0 && done; i--) {
+                // linha coluna
+                    holder = texelFetch (wind_texture , ivec2(3 , i ) , 0);
+
+                    if(holder.w == 0)
+                        done = false;
+                    else {
+                        holder.x = (holder.x * 15) - 7.5;
+                        holder.y = (holder.y * 15) - 7.5;
+                        holder.z = (holder.z * 15) - 7.5;
+                        holder.w = 50;
+
+                        wind += sink_source_effect( -1 ,holder);
+                }
+            }
+
+            break;
+            
 		default:
 
 			wind = fixed_intensity_random_direction();

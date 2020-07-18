@@ -296,7 +296,7 @@
 				component="WIND_REFRESH_RATE"			def="min=10 max=100000 step=1000"/>
 
 			<var label="Wind Type" 				type="RENDERER" context="CURRENT"
-				component="WIND_TYPE" 					strings="direction,intensity,vortex,source,sink,heli,multi,obstacle"/>
+				component="WIND_TYPE" 					strings="direction,intensity,vortex,source,sink,heli,multi,obstacle,texture"/>
 
 			<var label="Octaves"	  		  type="RENDERER" context="CURRENT"  component="OCTAVES"  	 def="min=1   max=16 step=1"/>
 			<var label="Persistence"  	  	  type="RENDERER" context="CURRENT"  component="PERSISTENCE" def="min=0.1 max=4  step=1"/>

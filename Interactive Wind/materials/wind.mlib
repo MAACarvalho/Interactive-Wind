@@ -2,6 +2,7 @@
 <materialLib name="WindLib">
 
 	<textures>
+		<texture name="wind_texture"  filename="../textures/wind/wind.png" />
 		<texture name="wind">
 			<WIDTH value=256 />
 			<HEIGHT value=256 />
@@ -26,14 +27,18 @@
 					<valueof uniform="wind_direction"		type="RENDERER" context="CURRENT" component="WIND_DIR"  />
 					<valueof uniform="wind_scale" 			type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 					<valueof uniform="wind_refresh_rate"	type="RENDERER" context="CURRENT" component="WIND_REFRESH_RATE"  />
-					<valueof uniform="wind_type"	type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
+					<valueof uniform="wind_type"			type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
 
 					<valueof uniform="octaves"				type="RENDERER" 	context="CURRENT" component="OCTAVES"  />
 					<valueof uniform="lacunarity"			type="RENDERER" 	context="CURRENT" component="LACUNARITY"  />
 					<valueof uniform="persistence"			type="RENDERER" 	context="CURRENT" component="PERSISTENCE"  />
 					<valueof uniform="var_per"				type="RENDERER" 	context="CURRENT" component="VAR_PER"  />
+					<valueof uniform="wind_texture" 		type="TEXTURE_BINDING"  context="CURRENT" component="UNIT" id=3 />					
 				</values>
 			</shader>
+			<textures>
+				<texture name="wind_texture" UNIT=3 />
+			</textures>
 			<imageTextures>
 				<imageTexture UNIT=1 texture="wind" >
 					<ACCESS value="READ_WRITE" />
