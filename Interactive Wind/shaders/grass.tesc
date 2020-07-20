@@ -117,7 +117,8 @@ void main() {
 			
 			float maxColorComponent = max(obstacle.x, max(obstacle.y, obstacle.z));
 
-			if (noise(DataIn[0].blade_id * rnd_seed + 1986) < maxColorComponent) {
+			// if (noise(DataIn[0].blade_id * rnd_seed + 1986) < maxColorComponent) {
+			if ( obstacle == vec4(0,0,0,0)) {
 
 				gl_TessLevelOuter[0] = 0;
 				gl_TessLevelOuter[1] = 0;

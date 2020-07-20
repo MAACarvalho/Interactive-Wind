@@ -72,7 +72,7 @@ vec4 sink_source(float strength, float radius, float angle) {
 
 }
 
-vec4 sink_source_effect(int type, vec4 wind_position){
+vec4 sink_source_effect(int type, vec4 wind_position, vec4 normal){
 
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1, 1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
@@ -90,6 +90,34 @@ vec4 sink_source_effect(int type, vec4 wind_position){
 	float new_position_y = new_radius * sin (new_theta) + wind_position.y;
 
     vec4 wind_dir = (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
+
+    if ( normal != vec4(0.0, 0.0, 0.0, 0.0)) {
+        float tamanho = length(wind_dir);
+        vec4 new_direction, best_direction;
+        float dot_product = dot( normalize( normal ) , normalize( wind_dir ) );
+
+        new_direction = vec4( -normal.z, normal.y, normal.x, normal.w);
+        dot_product = dot( normalize( wind_dir ) , normalize( new_direction ) );
+        
+        
+
+        // Counter Clock wise
+        //if ( dot_product  > 0.0f)
+            //new_direction = vec4( -normal.z, wind_dir.y, normal.x, wind_dir.w);
+        // Clock wise
+        //else 
+            //new_direction = vec4(0.0, 100.0, 0.0, 0.0);
+            //new_direction = vec4( normal.z, wind_dir.y, -normal.x, wind_dir.w);
+        
+        //dot_product = dot( normalize( vec4( -normal.z, normal.y, normal.x, normal.w) ), normalize( normal ) );
+
+        if ( dot_product > 0.0f)
+            new_direction = vec4( normal.z, normal.y, -normal.x, normal.w);
+
+        best_direction = new_direction;//mix( wind_dir , new_direction , abs(dot_product) );
+
+        wind_dir = best_direction;
+    }
 
 	return wind_dir;
 
@@ -159,7 +187,7 @@ vec4 get_sink_wind_from_tex () {
             holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
             holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
             
-            wind += sink_source_effect( 1, holder );
+            wind += sink_source_effect( 1, holder , vec4(0,0,0,0));
 
         }
     }
@@ -168,6 +196,7 @@ vec4 get_sink_wind_from_tex () {
 
 }
 
+/*
 vec4 get_source_wind_from_tex () {
 
     vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
@@ -227,6 +256,39 @@ vec4 get_source_wind_from_tex () {
     return wind;
 
 }
+*/
+
+vec4 get_source_wind_from_tex () {
+
+    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
+    bool done = true;
+
+    vec2 texel_dim = vec2(float(BOARD_X) / float(TEX_X), float(BOARD_Y) / float(TEX_Y));
+    vec2 tex_pos = gl_GlobalInvocationID.xy;
+
+    for (int i=99; i >= 0 && done; i--) {
+
+        vec4 holder = texelFetch (wind_texture, ivec2(3, i) , 0);
+        
+        if (holder.w == 0) done = false;
+        else {
+            
+            vec2 source_dir = (holder.xy * 256.0) - tex_pos;
+            vec2 source_dir_norm = normalize(source_dir) * texel_dim;
+            vec4 normal = texelFetch(obstacle_normals_texture, ivec2(tex_pos), 0);
+
+            holder.x = (holder.x * BOARD_X) - BOARD_X * 0.5;
+            holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
+            holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
+            
+            wind += 10 * sink_source_effect( -1, holder , normal);
+            
+        }
+    }
+
+    return wind;
+
+}
 
 void main() {
 
@@ -250,12 +312,12 @@ void main() {
 
 		case 2:
 
-			wind = sink_source_effect( -1 , vec4(-1,6,0,10)); // source
+			wind = sink_source_effect( -1 , vec4( -5,6,0,10), vec4(0,0,0,0)); // source
 			break;
 
 		case 3:
 
-			wind = sink_source_effect( 1 , vec4(-3,-3,0,10)); // sink 
+			wind = sink_source_effect( 1 , vec4(-3,-3,0,10) , vec4(0,0,0,0)); // sink 
 			break; 
 
         case 4:

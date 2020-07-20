@@ -234,7 +234,7 @@
 
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
-				<mode value="RUN_ONCE" />
+				<!-- <mode value="RUN_ONCE" /> -->
 				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass>
 
