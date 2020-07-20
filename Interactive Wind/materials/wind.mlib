@@ -3,6 +3,11 @@
 
 	<textures>
 		<texture name="wind_texture"  filename="../textures/wind/wind.png" />
+		<texture name="windDirTex">
+			<WIDTH value=256 />
+			<HEIGHT value=256 />
+			<INTERNAL_FORMAT value="RGBA32F" />
+		</texture>
 		<texture name="wind">
 			<WIDTH value=256 />
 			<HEIGHT value=256 />
@@ -12,35 +17,61 @@
 
 	<shaders>
 		<shader name="WindShader" 			cs="../shaders/wind.comp" /> 
+		<shader name="WindShaderVar" 		cs="../shaders/windVar.comp" /> 
 		<shader name="ShowWindTexShader" 	vs="../shaders/wind.vert" 
 											ps="../shaders/wind.frag" /> 
 	</shaders>
 	
 	<materials>
-		<!-- CALCULATE WIND -->
+		<!-- CALCULATE WIND DIR-->
 		<material name ="WindMat">
 			<shader name="WindShader">
 				<values>	
-					<valueof uniform="timer" 			type="RENDERER" 	 context="CURRENT" component="TIMER" />								
 					<valueof uniform="imageUnit"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
 
 					<valueof uniform="wind_direction"		type="RENDERER" context="CURRENT" component="WIND_DIR"  />
+					<valueof uniform="wind_type"			type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
+
+					<valueof uniform="wind_texture" 		type="TEXTURE_BINDING"  context="CURRENT" component="UNIT" id=2 />					
+
+					<valueof uniform="obstacle_normals_texture" 	type="TEXTURE_BINDING"  context="CURRENT" component="UNIT" id=3 />					
+
+				</values>
+			</shader>
+			<textures>
+				<texture name="wind_texture" UNIT=2 />
+				<texture name="ObstacleLib::obstacleNormalsTex"  UNIT = 3 />
+			</textures>
+			<imageTextures>
+				<imageTexture UNIT=1 texture="windDirTex" >
+					<ACCESS value="READ_WRITE" />
+					<LEVEL value=0 />
+				</imageTexture>
+			</imageTextures>
+		</material>
+		<!-- APPLY VARIATION TO WIND -->
+		<material name ="WindVarMat">
+			<shader name="WindShaderVar">
+				<values>	
+					<valueof uniform="timer" 			type="RENDERER" 	 context="CURRENT" component="TIMER" />								
+					<valueof uniform="windTex"			type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=1 />
+					<valueof uniform="windDirTex"		type="IMAGE_TEXTURE" context="CURRENT" component="UNIT" id=2 />
+
 					<valueof uniform="wind_scale" 			type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 					<valueof uniform="wind_refresh_rate"	type="RENDERER" context="CURRENT" component="WIND_REFRESH_RATE"  />
-					<valueof uniform="wind_type"			type="RENDERER" context="CURRENT" component="WIND_TYPE"  />
 
 					<valueof uniform="octaves"				type="RENDERER" 	context="CURRENT" component="OCTAVES"  />
 					<valueof uniform="lacunarity"			type="RENDERER" 	context="CURRENT" component="LACUNARITY"  />
 					<valueof uniform="persistence"			type="RENDERER" 	context="CURRENT" component="PERSISTENCE"  />
 					<valueof uniform="var_per"				type="RENDERER" 	context="CURRENT" component="VAR_PER"  />
-					<valueof uniform="wind_texture" 		type="TEXTURE_BINDING"  context="CURRENT" component="UNIT" id=3 />					
 				</values>
 			</shader>
-			<textures>
-				<texture name="wind_texture" UNIT=3 />
-			</textures>
 			<imageTextures>
 				<imageTexture UNIT=1 texture="wind" >
+					<ACCESS value="READ_WRITE" />
+					<LEVEL value=0 />
+				</imageTexture>
+				<imageTexture UNIT=2 texture="windDirTex" >
 					<ACCESS value="READ_WRITE" />
 					<LEVEL value=0 />
 				</imageTexture>
@@ -53,11 +84,11 @@
 					<valueof uniform="wind_direction"	type="RENDERER" context="CURRENT" component="WIND_DIR"  />
 					<valueof uniform="wind_scale" 		type="RENDERER" context="CURRENT" component="WIND_SCALE"  />	
 	
-					<valueof uniform="wind_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=2 />
+					<valueof uniform="wind_tex"  type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=1 />
 				</values>
 			</shader>
 			<textures>
-				<texture name="wind" UNIT=2 />
+				<texture name="wind" UNIT=1 />
 			</textures>
 		</material>
 	</materials>

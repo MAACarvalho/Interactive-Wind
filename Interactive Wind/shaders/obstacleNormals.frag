@@ -16,7 +16,8 @@ void main() {
 
 	ivec2 posInTex = ivec2 ( (DataIn.world_position.xz + 15.0) / 30.0 * 256 ) ;
 	
-	imageStore(imageUnit, posInTex, vec4(DataIn.normal * 0.5 + 0.5, 1.0));
+	//imageStore(imageUnit, posInTex, vec4(DataIn.normal * 0.5 + 0.5, 1.0));
+	imageStore(imageUnit, posInTex, vec4(DataIn.normal, 1.0));
 	
 	output = vec4(DataIn.normal * 0.5 + 0.5, 1.0);
 	

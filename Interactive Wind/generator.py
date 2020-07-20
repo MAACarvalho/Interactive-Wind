@@ -1,3 +1,6 @@
+import numpy as np
+from PIL import Image
+
 vortex = []
 source = []
 sink = []
@@ -54,4 +57,4 @@ if source:
         array[ i[0] , 3] = source[i[0]]
 
 img = Image.fromarray(array)
-img.save('wind.png')
+img.save('textures/wind/wind.png')

@@ -105,30 +105,40 @@ void main() {
 
 		vec2 texPos = vec2((gl_in[0].gl_Position.xz + 15.0) / 30.0);
 
-		if (texture(obstacle_tex, texPos) == vec4 (1.0, 1.0, 1.0, 1.0)
-		 	|| gl_in[0].gl_Position.x < -15.0
-			|| gl_in[0].gl_Position.x > 15.0
-			|| gl_in[0].gl_Position.z < -15.0
-			|| gl_in[0].gl_Position.z > 15.0) {
+		vec4 obstacle = texture(obstacle_tex, texPos);
 
+		if (gl_in[0].gl_Position.x < -15.0 || gl_in[0].gl_Position.x > 15.0 || 
+			gl_in[0].gl_Position.z < -15.0 || gl_in[0].gl_Position.z > 15.0 ) {
+				
 			gl_TessLevelOuter[0] = 0;
 			gl_TessLevelOuter[1] = 0;
-			
+
 		} else {
+			
+			float maxColorComponent = max(obstacle.x, max(obstacle.y, obstacle.z));
 
-			// Tessellating blade 
-			//if (!outside) {
+			if (noise(DataIn[0].blade_id * rnd_seed + 1986) < maxColorComponent) {
 
-			gl_TessLevelOuter[0] = 1;
-			gl_TessLevelOuter[1] = bld_levels;
-				
-			// Culling blade
-			// } else {
+				gl_TessLevelOuter[0] = 0;
+				gl_TessLevelOuter[1] = 0;
+			
+			} else {
 
-			// 	gl_TessLevelOuter[0] = 0;
-			// 	gl_TessLevelOuter[1] = 0;
+				// Tessellating blade 
+				//if (!outside) {
 
-			// }
+				gl_TessLevelOuter[0] = 1;
+				gl_TessLevelOuter[1] = bld_levels;
+					
+				// Culling blade
+				// } else {
+
+				// 	gl_TessLevelOuter[0] = 0;
+				// 	gl_TessLevelOuter[1] = 0;
+
+				// }
+
+			}
 
 		}
 	

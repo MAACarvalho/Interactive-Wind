@@ -211,7 +211,7 @@ vec4 calculate_tip () {
     }
 
     // Calculating recovery
-    float stiffness = min(1, max(0, bld_stiffness + (noise(gl_InstanceID * rnd_seed + 4274) - 0.5) * bld_stiffness_var));
+    float stiffness = min(1, max(0, bld_stiffness - noise(gl_InstanceID * rnd_seed + 4274) * bld_stiffness_var));
     vec3 recovery = (initial_tip.xyz - tip.xyz) * stiffness;
 
     tip.xyz += recovery;        

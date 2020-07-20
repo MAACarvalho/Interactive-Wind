@@ -1,8 +1,8 @@
 #version 430
 
 #define M_PI 3.141592654f
-#define BOARD_X 15
-#define BOARD_Y 15
+#define BOARD_X 30
+#define BOARD_Y 30
 #define TEX_X 256
 #define TEX_Y 256
 
@@ -10,74 +10,20 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout (binding = 0, rgba32f) uniform image2D imageUnit;
 uniform sampler2D wind_texture;
-
-uniform float timer;
+uniform sampler2D obstacle_normals_texture;
 
 uniform vec3 wind_direction;
-uniform float wind_scale;
-uniform float wind_refresh_rate;
 uniform int wind_type;
-
-uniform int octaves;
-uniform float lacunarity;
-uniform float persistence;
-uniform float var_per;
-
-// Simplex 2D noise
-//
-vec3 permute (vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-
-float snoise (vec2 v){
-  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-           -0.577350269189626, 0.024390243902439);
-  vec2 i  = floor(v + dot(v, C.yy) );
-  vec2 x0 = v -   i + dot(i, C.xx);
-  vec2 i1;
-  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-  vec4 x12 = x0.xyxy + C.xxzz;
-  x12.xy -= i1;
-  i = mod(i, 289.0);
-  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-  + i.x + vec3(0.0, i1.x, 1.0 ));
-  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
-    dot(x12.zw,x12.zw)), 0.0);
-  m = m*m ;
-  m = m*m ;
-  vec3 x = 2.0 * fract(p * C.www) - 1.0;
-  vec3 h = abs(x) - 0.5;
-  vec3 ox = floor(x + 0.5);
-  vec3 a0 = x - ox;
-  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-  vec3 g;
-  g.x  = a0.x  * x0.x  + h.x  * x0.y;
-  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-  return 130.0 * dot(m, g);
-}
-
-float noise_octaves(vec2 pos) {
-
-    float result = 0.0f, freq = 1.0f, amp = 1.0f;
-
-		for (int  i = 0; i < octaves; i++ , freq *= lacunarity, amp *= persistence )
-			result += snoise(freq * pos) * amp;
-
-    return result;
-}
 
 vec4 random_intensity_fixed_direction() {
 
-    float value = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751)) * 0.5 + 0.5;
+    return vec4(wind_direction.x, wind_direction.y, wind_direction.z, 1.0);
 
-    return vec4(wind_direction.x * value * wind_scale, wind_direction.y * value * wind_scale, wind_direction.z  * value * wind_scale, 1.0);
 }
 
-vec4 fixed_intensity_random_direction() {
+vec4 random_intensity_fixed_direction(vec4 wind_dir) {
 
-    float value_0 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 4751));
-    float value_1 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 6153, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 6153));
-    float value_2 = noise_octaves(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer/wind_refresh_rate + 8072, float(gl_GlobalInvocationID.y) / 1024.0 + timer/wind_refresh_rate + 8072));
-	
-    return vec4 (value_0 * wind_scale, value_1 * wind_scale, value_2 * wind_scale, 1.0);
+    return vec4(wind_dir.x, wind_dir.y, wind_dir.z, 1.0);
 
 }
 
@@ -109,9 +55,9 @@ vec4 vortex_effect( vec4 wind_position ){
 	float new_position_x = new_radius * cos (new_theta) + wind_position.x;
 	float new_position_y = new_radius * sin (new_theta) + wind_position.y;
 
-    float strength = wind_scale * (1 + snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer / wind_refresh_rate + 4751)) * 0.5); 
+    vec4 wind_dir = (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
 
-	return strength * (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
+	return wind_dir;
 }
 
 
@@ -135,7 +81,7 @@ vec4 sink_source_effect(int type, vec4 wind_position){
     float radius = length(vec2(position_x - wind_position.x, position_y - wind_position.y));
     float theta = atan(position_y - wind_position.y, position_x - wind_position.x );
 
-    vec4 polar_velocity = sink_source(type * 5, radius , theta);
+    vec4 polar_velocity = sink_source(type * 10, radius , theta);
 
 	float new_radius = radius + polar_velocity.x;
 	float new_theta  = theta + polar_velocity.y;
@@ -143,36 +89,143 @@ vec4 sink_source_effect(int type, vec4 wind_position){
 	float new_position_x = new_radius * cos (new_theta) + wind_position.x;
 	float new_position_y = new_radius * sin (new_theta) + wind_position.y;
 
-    float strength = wind_scale + (snoise(vec2(float(gl_GlobalInvocationID.x) / 1024.0 + timer / wind_refresh_rate + 4751, float(gl_GlobalInvocationID.y) / 1024.0 + timer / wind_refresh_rate + 4751)) + 1) * 0.5 * wind_scale; // hard coded
+    vec4 wind_dir = (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
 
-	return strength * (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
-
-}
-
-vec4 heli_polar_to_cartesian (vec4 polar, float radius, float theta) {
-
-  return vec4( polar.x * sin( theta + polar.y ) * -1 + (radius - polar.x)  * cos( polar.y ),
-               polar.z ,
-               polar.x * cos( theta + polar.y )      + (radius - polar.x)  * sin( polar.y ),
-               polar.w );
+	return wind_dir;
 
 }
 
-vec4 heli_effect( vec4 wind_position ){
+vec4 get_cons_wind_from_tex () {
 
-    float strength = wind_scale + noise_octaves(vec2(timer/wind_refresh_rate, timer/wind_refresh_rate)) * var_per * wind_scale;
-    strength*=10;
+    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
+    bool done = true;
 
-    vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1,1);
-    float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
-    float position_y = (pos.y * BOARD_Y / TEX_Y ) - BOARD_Y / 2.0f; // Centering on (0,0)
+    // Constant
+    for (int i=99; i >= 0 && done; i--) {
+        
+        vec4 holder = texelFetch (wind_texture , ivec2(0, i), 0);
+        
+        if (holder.w == 0) done = false;
+        else {
 
-    float radius = length(vec2(position_x - wind_position.x,position_y - wind_position.y));
-    float theta = atan( position_y - wind_position.y , position_x - wind_position.x );
+            wind += random_intensity_fixed_direction(holder);
 
-    vec4 polar_velocity = vortex(strength , radius , theta);
+        }
+    
+    }
 
-    return heli_polar_to_cartesian(polar_velocity, radius, theta);
+    return wind;
+
+}
+
+vec4 get_vortex_wind_from_tex () {
+
+    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
+    bool done = true;
+
+    for (int i=99; i >= 0 && done; i--) {
+
+        vec4 holder = texelFetch (wind_texture , ivec2(1, i) , 0);
+
+        if (holder.w == 0) done = false;
+        else {
+
+            holder.x = (holder.x * BOARD_X) - BOARD_X * 0.5;
+            holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
+            holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
+
+            wind += vortex_effect( holder );
+
+        }
+    }
+
+    return wind;
+
+}
+
+vec4 get_sink_wind_from_tex () {
+
+    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
+    bool done = true;
+
+    for (int i=99; i >= 0 && done; i--) {
+
+        vec4 holder = texelFetch (wind_texture , ivec2(2, i) , 0);
+        
+        if(holder.w == 0) done = false;
+        else {
+
+            holder.x = (holder.x * BOARD_X) - BOARD_X * 0.5;
+            holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
+            holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
+            
+            wind += sink_source_effect( 1, holder );
+
+        }
+    }
+
+    return wind;
+
+}
+
+vec4 get_source_wind_from_tex () {
+
+    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
+    bool done = true;
+
+    vec2 texel_dim = vec2(float(BOARD_X) / float(TEX_X), float(BOARD_Y) / float(TEX_Y));
+    vec2 tex_pos = gl_GlobalInvocationID.xy;
+
+    for (int i=99; i >= 0 && done; i--) {
+
+        vec4 holder = texelFetch (wind_texture, ivec2(3, i) , 0);
+        
+        if (holder.w == 0) done = false;
+        else {
+            
+            vec2 source_dir = (holder.xy * 256.0) - tex_pos;
+            vec2 source_dir_norm = normalize(source_dir) * texel_dim;
+
+            vec2 current_texel = tex_pos;
+
+            int j = 0; bool occluded = false;
+            while (true) {
+
+                j++;
+                
+                if (length(source_dir_norm * j) > length(source_dir)) break;
+
+                ivec2 texel = ivec2(tex_pos + source_dir_norm * j);
+
+                if (texel == current_texel) continue;
+                else {
+                    
+                    current_texel = texel;
+
+                    vec4 normal = texelFetch(obstacle_normals_texture, texel, 0);
+
+                    if (normal != vec4(0.0, 0.0, 0.0, 0.0)) {occluded = true; break; }
+
+                }
+
+
+            }
+
+            if (!occluded) {
+
+                holder.x = (holder.x * BOARD_X) - BOARD_X * 0.5;
+                holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
+                holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
+                
+                wind += 10 * sink_source_effect( -1, holder );
+
+            }
+            
+        }
+    }
+
+    return wind;
+
 }
 
 void main() {
@@ -182,9 +235,6 @@ void main() {
 	vec4 stored = imageLoad( imageUnit, storeLoc );
 
 	vec4 wind = vec4(0,0,0,0);
-    int i;
-    vec4 holder;
-    bool done;
 
 	switch (wind_type) {
 		
@@ -195,113 +245,34 @@ void main() {
 		
 		case 1:
 
-			wind = fixed_intensity_random_direction();
+			wind = vortex_effect( vec4(-1,-2,0,10) );
 			break;
 
 		case 2:
 
-			wind = vortex_effect( vec4(-1,-2,0,10) );
+			wind = sink_source_effect( -1 , vec4(-1,6,0,10)); // source
 			break;
 
 		case 3:
 
-			wind = sink_source_effect( -1 , vec4(-1,6,0,10)); // source
-			break;
-
-		case 4:
-
 			wind = sink_source_effect( 1 , vec4(-3,-3,0,10)); // sink 
 			break; 
 
-		case 5:
+        case 4:
 
-			wind = heli_effect ( vec4(0, 0, 0, 1));
-			break;
-
-		case 6:
-
-			wind = random_intensity_fixed_direction();
-			//wind += sink_source_effect( -1 , vec4(-3,3,0,10)); // sink 
-			//for (int i=0; i<9; i++) {
-				//wind += sink_source_effect( -1 , vec4(-1 + 0.2 * i, -2.5, 0, 10)) * 0.1; // source 
-			//}
-			wind += vortex_effect(vec4(0, 0, 0, 1)); // vortex 
-			break; 
-		
-		case 7:
-
-			wind = random_intensity_fixed_direction();
-			for (int i=0; i<9; i++) wind += sink_source_effect(-1 , vec4(-1 + 0.2 * i, -2.5, 0, 10)); // source 
-			break; 
-
-        case 8:
-            // Constant, todo
-            for (i=99, done = true; i >= 0 && done; i--) {
-                holder = texelFetch (wind_texture , ivec2(0 , i), 0);
-                if(holder.w == 0)
-                    done = false;
-                else
-                    wind += random_intensity_fixed_direction();;
-            }
-
-            for (i=99, done = true; i >= 0 && done; i--) {
-                // linha coluna
-                    holder = texelFetch (wind_texture , ivec2(1 , i ) , 0);
-
-                    if(holder.w == 0)
-                        done = false;
-                    else {
-                        holder.x = (holder.x * 15) - 7.5;
-                        holder.y = (holder.y * 15) - 7.5;
-                        holder.z = (holder.z * 15) - 7.5;
-                        holder.w = 50;
-
-                        wind += vortex_effect( holder );
-                }
-            }
-
-            for (i=99, done = true; i >= 0 && done; i--) {
-                // linha coluna
-                    holder = texelFetch (wind_texture , ivec2(2 , i ) , 0);
-
-                    if(holder.w == 0)
-                        done = false;
-                    else {
-                        holder.x = (holder.x * 15) - 7.5;
-                        holder.y = (holder.y * 15) - 7.5;
-                        holder.z = (holder.z * 15) - 7.5;
-                        holder.w = 50;
-
-                        wind += sink_source_effect( 1, holder );
-                    
-                }
-            }
-
-            for (i=99, done = true; i >= 0 && done; i--) {
-                // linha coluna
-                    holder = texelFetch (wind_texture , ivec2(3 , i ) , 0);
-
-                    if(holder.w == 0)
-                        done = false;
-                    else {
-                        holder.x = (holder.x * 15) - 7.5;
-                        holder.y = (holder.y * 15) - 7.5;
-                        holder.z = (holder.z * 15) - 7.5;
-                        holder.w = 50;
-
-                        wind += sink_source_effect( -1 ,holder);
-                }
-            }
+            wind += get_cons_wind_from_tex();
+            wind += get_vortex_wind_from_tex();
+            wind += get_sink_wind_from_tex();            
+            wind += get_source_wind_from_tex();
 
             break;
             
 		default:
 
-			wind = fixed_intensity_random_direction();
+			wind = random_intensity_fixed_direction();
 			break;
 
 	} 
-
 
 	imageStore(imageUnit, storeLoc, wind);
 }

@@ -38,18 +38,19 @@
 			<!-- Wind -->
 
 			<attribute name="WIND_DIR" 
-				data="VEC3" type="RENDERER" x="1" y="0" z="1" />
+				data="VEC3" type="RENDERER" x="0" y="0" z="1" />
 			<attribute name="WIND_SCALE" 
 				data="FLOAT" type="RENDERER" value="1" />
 			<attribute name="WIND_REFRESH_RATE" 
-				data="FLOAT" type="RENDERER" value="5000" />
+				data="FLOAT" type="RENDERER" value="10000" />
+			<attribute name="WIND_TYPE"    
+				data="INT"   type="RENDERER" value="4"   />
 
 			<!-- Wind Perlin -->
 
-			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="8"   />
+			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="3"   />
 			<attribute name="LACUNARITY"   data="FLOAT" type="RENDERER" value="2"   />
 			<attribute name="PERSISTENCE"  data="FLOAT" type="RENDERER" value="0.5" />
-			<attribute name="WIND_TYPE"    data="INT"   type="RENDERER" value="1"   />
 			<attribute name="VAR_PER"      data="FLOAT" type="RENDERER" value="0.5" />
 
 		</attributes>
@@ -223,17 +224,23 @@
 			</pass>
 
 			<!-- -Obstacle Tex Pass -->
-			<!-- <pass class="quad" name="ObstacleTexPass" >
+			<pass class="quad" name="ObstacleTexPass" >
 				<viewport name="ObstacleTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="ObstacleLib" toMaterial="ShowObstacleTexMat" />
 				</materialMaps>
-			</pass> -->
+			</pass>
 
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
+				<mode value="RUN_ONCE" />
 				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
+			</pass>
+
+			<!-- Wind Var Pass -->
+			<pass class="compute" name="WindPass">
+				<material name="WindVarMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass>
 
 			<!-- Grass Pass -->
@@ -296,7 +303,7 @@
 				component="WIND_REFRESH_RATE"			def="min=10 max=100000 step=1000"/>
 
 			<var label="Wind Type" 				type="RENDERER" context="CURRENT"
-				component="WIND_TYPE" 					strings="direction,intensity,vortex,source,sink,heli,multi,obstacle,texture"/>
+				component="WIND_TYPE" 					strings="FixedDirection,Vortex,Source,Sink,Texture"/>
 
 			<var label="Octaves"	  		  type="RENDERER" context="CURRENT"  component="OCTAVES"  	 def="min=1   max=16 step=1"/>
 			<var label="Persistence"  	  	  type="RENDERER" context="CURRENT"  component="PERSISTENCE" def="min=0.1 max=4  step=1"/>

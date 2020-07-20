@@ -21,6 +21,7 @@
 			<HEIGHT value=256 />
 			<INTERNAL_FORMAT value="RGBA32F" />
 		</texture>
+		<!-- <texture name="obstacleTex"  filename="../textures/obstacle/obstacle.png" /> -->
 	</textures>
 
 	<shaders>
@@ -62,8 +63,6 @@
 				<imageTexture UNIT=1 texture="obstacleTex" >
 					<ACCESS value="READ_WRITE" />
 					<LEVEL value=0 />
-					<!-- <CLEAR value="true" /> -->
-					<!-- <INTERNAL_FORMAT value="RGBA32F" /> -->
 				</imageTexture>
 			</imageTextures>
 			<state name="voxelization" />
@@ -89,8 +88,6 @@
 				<imageTexture UNIT=1 texture="obstacleNormalsTex" >
 					<ACCESS value="READ_WRITE" />
 					<LEVEL value=0 />
-					<!-- <CLEAR value="true" /> -->
-					<!-- <INTERNAL_FORMAT value="RGBA32F" /> -->
 				</imageTexture>
 			</imageTextures>
 			<state name="voxelization" />
