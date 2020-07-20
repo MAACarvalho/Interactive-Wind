@@ -92,32 +92,27 @@ vec4 sink_source_effect(int type, vec4 wind_position, vec4 normal){
     vec4 wind_dir = (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
 
     if ( normal != vec4(0.0, 0.0, 0.0, 0.0)) {
-        float tamanho = length(wind_dir);
-        vec4 new_direction, best_direction;
-        float dot_product = dot( normalize( normal ) , normalize( wind_dir ) );
 
-        new_direction = vec4( -normal.z, normal.y, normal.x, normal.w);
-        dot_product = dot( normalize( wind_dir ) , normalize( new_direction ) );
-        
-        
+        vec2 normal_xz = normalize(normal).xz;
+        vec2 parallel_xz = vec2(normal_xz.y, normal_xz.x);
+        vec2 wind_dir_xz = normalize(wind_dir).xz;
 
-        // Counter Clock wise
-        //if ( dot_product  > 0.0f)
-            //new_direction = vec4( -normal.z, wind_dir.y, normal.x, wind_dir.w);
-        // Clock wise
-        //else 
-            //new_direction = vec4(0.0, 100.0, 0.0, 0.0);
-            //new_direction = vec4( normal.z, wind_dir.y, -normal.x, wind_dir.w);
-        
-        //dot_product = dot( normalize( vec4( -normal.z, normal.y, normal.x, normal.w) ), normalize( normal ) );
+        float dot_product_normal   = dot( normal_xz, wind_dir_xz );
+        float dot_product_parallel = dot( parallel_xz, wind_dir_xz );
 
-        if ( dot_product > 0.0f)
-            new_direction = vec4( normal.z, normal.y, -normal.x, normal.w);
+        //if ( dot_product_parallel < 0.0 || dot_product_normal < 0.0) {
+        if ( dot_product_parallel < 0.0 ) {
 
-        best_direction = new_direction;//mix( wind_dir , new_direction , abs(dot_product) );
+            parallel_xz = - parallel_xz;
 
-        wind_dir = best_direction;
-    }
+        }
+
+        //best_direction = new_direction;//mix( wind_dir , new_direction , abs(dot_product) );
+
+        wind_dir = vec4(parallel_xz.x, wind_dir.y, parallel_xz.y, wind_dir.w);
+        //wind_dir = vec4(0.0, 100.0, 0.0, 1.0);
+
+    } //else wind_dir = vec4(0.0, 100.0, 0.0, 1.0);
 
 	return wind_dir;
 

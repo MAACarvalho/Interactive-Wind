@@ -162,7 +162,7 @@
 			</pass>
 
 			<!-- Show Obstacle Pass -->
-			<pass class="default" name="ShowObstaclePass">
+			<!-- <pass class="default" name="ShowObstaclePass">
 				
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -175,7 +175,7 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-			</pass>
+			</pass> -->
 			
 			<!-- Store Obstacle Location Pass -->
 			<pass class="default" name="StoreObstacleLocationPass">
