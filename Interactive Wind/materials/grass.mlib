@@ -91,7 +91,7 @@
 
 				<texture name="WindLib::wind"  	UNIT = 7 />
 
-				<texture name="ObstacleLib::obstacleNormalsTex"  	UNIT = 8 />
+				<texture name="ObstacleLib::obstacleTex"  	UNIT = 8 />
 
 			</textures>
 		</material>

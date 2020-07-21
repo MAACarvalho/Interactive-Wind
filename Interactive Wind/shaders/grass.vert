@@ -195,7 +195,8 @@ vec4 calculate_tip () {
     int lines = int(floor(sqrt(instance_count)));
 	int x_index = int(floor(gl_InstanceID / lines));
     int z_index = int(mod(gl_InstanceID, lines));
-	vec4 wind = texture (wind_tex, vec2(x_index/float(lines), z_index/float(lines)));
+
+    vec4 wind = texture (wind_tex, vec2((translated_base.xz + 15.0) / 30.0));
 
     // Applying wind force to the grass
     if (wind.xyz != vec3(0,0,0)) {

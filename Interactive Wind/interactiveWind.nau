@@ -49,7 +49,7 @@
 			<!-- Wind Perlin -->
 
 			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="3"   />
-			<attribute name="LACUNARITY"   data="FLOAT" type="RENDERER" value="2"   />
+			<attribute name="LACUNARITY"   data="FLOAT" type="RENDERER" value="1"   />
 			<attribute name="PERSISTENCE"  data="FLOAT" type="RENDERER" value="0.5" />
 			<attribute name="VAR_PER"      data="FLOAT" type="RENDERER" value="0.5" />
 
@@ -71,7 +71,7 @@
 			<scene name="ObstacleScene" type="OctreeByMat">
 				<geometry name = "Wall" type = "BOX" material="WallMat">
 					<TRANSLATE x=-2 y=4 z=-4/>
-					<SCALE x=4 y=4 z=1/>
+					<SCALE x=1 y=4 z=1/>
 				</geometry>
 			</scene>
 		</scenes>
@@ -162,7 +162,7 @@
 			</pass>
 
 			<!-- Show Obstacle Pass -->
-			<!-- <pass class="default" name="ShowObstaclePass">
+			<pass class="default" name="ShowObstaclePass">
 				
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -175,7 +175,7 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-			</pass> -->
+			</pass>
 			
 			<!-- Store Obstacle Location Pass -->
 			<pass class="default" name="StoreObstacleLocationPass">

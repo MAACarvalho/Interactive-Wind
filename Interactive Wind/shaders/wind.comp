@@ -1,10 +1,11 @@
 #version 430
 
 #define M_PI 3.141592654f
-#define BOARD_X 30
-#define BOARD_Y 30
+#define BOARD_X 30.0
+#define BOARD_Y 30.0
 #define TEX_X 256
 #define TEX_Y 256
+#define TEXEL_DIM min(BOARD_X/TEX_X, BOARD_Y/TEX_X)
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -72,7 +73,7 @@ vec4 sink_source(float strength, float radius, float angle) {
 
 }
 
-vec4 sink_source_effect(int type, vec4 wind_position, vec4 normal){
+vec4 sink_source_effect(int type, vec4 wind_position){
 
     vec4 pos = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, 1, 1);
     float position_x = (pos.x * BOARD_X / TEX_X ) - BOARD_X / 2.0f; // Centering on (0,0)
@@ -81,7 +82,7 @@ vec4 sink_source_effect(int type, vec4 wind_position, vec4 normal){
     float radius = length(vec2(position_x - wind_position.x, position_y - wind_position.y));
     float theta = atan(position_y - wind_position.y, position_x - wind_position.x );
 
-    vec4 polar_velocity = sink_source(type * 10, radius , theta);
+    vec4 polar_velocity = sink_source(type * 50, radius , theta);
 
 	float new_radius = radius + polar_velocity.x;
 	float new_theta  = theta + polar_velocity.y;
@@ -91,29 +92,91 @@ vec4 sink_source_effect(int type, vec4 wind_position, vec4 normal){
 
     vec4 wind_dir = (vec4(new_position_x, 0, new_position_y, 1) - vec4 (position_x, 0, position_y, 0));
 
-    if ( normal != vec4(0.0, 0.0, 0.0, 0.0)) {
+    // Check for wall in between
+    int between_steps = 500;
+    
+    vec2 tex_pos = gl_GlobalInvocationID.xy;
+    vec2 current_texel = tex_pos;
+    vec2 source_dir = ((wind_position.xz + BOARD_X * 0.5) / BOARD_X * 256) - tex_pos;
+    vec2 source_dir_step = normalize(source_dir) * TEXEL_DIM;
+    vec4 normal = vec4(0.0, 0.0, 0.0, 0.0);
+    
+    int step = 0; bool wall_between = false;
+    for (; step < between_steps; step++) {
+                
+        if (length(source_dir_step * step) > length(source_dir)) break;
 
-        vec2 normal_xz = normalize(normal).xz;
-        vec2 parallel_xz = vec2(normal_xz.y, normal_xz.x);
-        vec2 wind_dir_xz = normalize(wind_dir).xz;
+        ivec2 texel = ivec2(tex_pos + source_dir_step * step);
 
-        float dot_product_normal   = dot( normal_xz, wind_dir_xz );
-        float dot_product_parallel = dot( parallel_xz, wind_dir_xz );
+        if (texel == current_texel) continue;
+        else {
+                    
+            current_texel = texel;
 
-        //if ( dot_product_parallel < 0.0 || dot_product_normal < 0.0) {
-        if ( dot_product_parallel < 0.0 ) {
+            normal = texelFetch(obstacle_normals_texture, texel, 0);
 
-            parallel_xz = - parallel_xz;
+            //if (normal != vec4(0.0, 0.0, 0.0, 0.0)) { wall_between = true; break; }
+
+            vec2 normal_xz = normalize(normal).xz;
+            vec2 parallel_xz = vec2(normal_xz.y, -normal_xz.x);
+            vec2 source_dir_xz = normalize(source_dir);
+
+            float dot_normal_source = dot (normal_xz, source_dir_xz);
+
+            if (dot_normal_source < 0.0) {wall_between = true; break;}
 
         }
 
-        //best_direction = new_direction;//mix( wind_dir , new_direction , abs(dot_product) );
+    }
 
-        wind_dir = vec4(parallel_xz.x, wind_dir.y, parallel_xz.y, wind_dir.w);
-        //wind_dir = vec4(0.0, 100.0, 0.0, 1.0);
+    if (wall_between) wind_dir = mix (normalize(wind_dir) * 0.0001, wind_dir, float(step) / float(between_steps));
+    else {
 
-    } //else wind_dir = vec4(0.0, 100.0, 0.0, 1.0);
+        // Check for wall after
+        int after_steps = 900;
+        
+        vec2 away_source_dir = tex_pos - ((wind_position.xz + BOARD_X * 0.5) / BOARD_X * 256);
+        vec2 away_source_dir_step = normalize(away_source_dir) * TEXEL_DIM;
+        //vec2 wind_dir_step = vec2(normalize(wind_dir).xz) * TEXEL_DIM;
+        vec2 parallel = vec2(0.0, 0.0);
 
+        int step = 0; bool wall_after = false;
+        for (; step < after_steps; step++) {
+                    
+            ivec2 texel = ivec2(tex_pos + away_source_dir_step * step);
+
+            if (texel == current_texel) continue;
+            else {
+                        
+                current_texel = texel;
+
+                normal = texelFetch(obstacle_normals_texture, texel, 0);
+
+                vec2 normal_xz = normalize(normal).xz;
+                vec2 parallel_xz = vec2(normal_xz.y, -normal_xz.x);
+                vec2 away_source_dir_xz = normalize(away_source_dir);
+
+                float dot_away_parallel = dot( parallel_xz, away_source_dir_xz );
+
+                if ( dot_away_parallel > 0.0 ) parallel_xz = - parallel_xz;
+                
+                parallel = normalize(parallel_xz) * length(wind_dir);
+
+                float dot_normal_source = dot (normal_xz, away_source_dir_xz);
+
+                if (dot_normal_source < 0.0) {wall_after = true; break;}
+
+            }
+
+        }
+
+        float smoo = smoothstep(0, after_steps, step);
+
+        if (wall_after) wind_dir = mix (normalize(vec4(parallel.x, 0.0, parallel.y, 1.0)) * length(wind_dir), wind_dir, smoo);
+    
+    }
+
+    
 	return wind_dir;
 
 }
@@ -182,7 +245,7 @@ vec4 get_sink_wind_from_tex () {
             holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
             holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
             
-            wind += sink_source_effect( 1, holder , vec4(0,0,0,0));
+            wind += sink_source_effect( 1, holder);
 
         }
     }
@@ -190,68 +253,6 @@ vec4 get_sink_wind_from_tex () {
     return wind;
 
 }
-
-/*
-vec4 get_source_wind_from_tex () {
-
-    vec4 wind = vec4 (0.0, 0.0, 0.0, 0.0);
-    bool done = true;
-
-    vec2 texel_dim = vec2(float(BOARD_X) / float(TEX_X), float(BOARD_Y) / float(TEX_Y));
-    vec2 tex_pos = gl_GlobalInvocationID.xy;
-
-    for (int i=99; i >= 0 && done; i--) {
-
-        vec4 holder = texelFetch (wind_texture, ivec2(3, i) , 0);
-        
-        if (holder.w == 0) done = false;
-        else {
-            
-            vec2 source_dir = (holder.xy * 256.0) - tex_pos;
-            vec2 source_dir_norm = normalize(source_dir) * texel_dim;
-
-            vec2 current_texel = tex_pos;
-
-            int j = 0; bool occluded = false;
-            while (true) {
-
-                j++;
-                
-                if (length(source_dir_norm * j) > length(source_dir)) break;
-
-                ivec2 texel = ivec2(tex_pos + source_dir_norm * j);
-
-                if (texel == current_texel) continue;
-                else {
-                    
-                    current_texel = texel;
-
-                    vec4 normal = texelFetch(obstacle_normals_texture, texel, 0);
-
-                    if (normal != vec4(0.0, 0.0, 0.0, 0.0)) {occluded = true; break; }
-
-                }
-
-
-            }
-
-            if (!occluded) {
-
-                holder.x = (holder.x * BOARD_X) - BOARD_X * 0.5;
-                holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
-                holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
-                
-                wind += 10 * sink_source_effect( -1, holder );
-
-            }
-            
-        }
-    }
-
-    return wind;
-
-}
-*/
 
 vec4 get_source_wind_from_tex () {
 
@@ -276,7 +277,7 @@ vec4 get_source_wind_from_tex () {
             holder.y = (holder.y * BOARD_X) - BOARD_X * 0.5;
             holder.z = (holder.z * BOARD_Y) - BOARD_Y * 0.5;
             
-            wind += 10 * sink_source_effect( -1, holder , normal);
+            wind += 10 * sink_source_effect( -1, holder);
             
         }
     }
@@ -307,12 +308,12 @@ void main() {
 
 		case 2:
 
-			wind = sink_source_effect( -1 , vec4( -5,6,0,10), vec4(0,0,0,0)); // source
+			wind = sink_source_effect( -1 , vec4( -5,6,0,10)); // source
 			break;
 
 		case 3:
 
-			wind = sink_source_effect( 1 , vec4(-3,-3,0,10) , vec4(0,0,0,0)); // sink 
+			wind = sink_source_effect( 1 , vec4(-3,-3,0,10)); // sink 
 			break; 
 
         case 4:
