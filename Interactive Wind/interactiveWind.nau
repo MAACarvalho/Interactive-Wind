@@ -69,9 +69,13 @@
 				</geometry>
 			</scene>
 			<scene name="ObstacleScene" type="OctreeByMat">
-				<geometry name = "Wall" type = "BOX" material="WallMat">
+				<geometry name = "Wall1" type = "BOX" material="WallMat">
 					<TRANSLATE x=-2 y=4 z=-4/>
-					<SCALE x=1 y=4 z=8/>
+					<SCALE x=1 y=4 z=2/>
+				</geometry>
+				<geometry name = "Wall2" type = "BOX" material="WallMat">
+					<TRANSLATE x=2 y=4 z=0/>
+					<SCALE x=2 y=4 z=2/>
 				</geometry>
 			</scene>
 		</scenes>
@@ -234,7 +238,7 @@
 
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
-				<mode value="RUN_ONCE" />
+				<!-- <mode value="RUN_ONCE" /> -->
 				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass>
 

@@ -16,15 +16,138 @@ uniform sampler2D obstacle_normals_texture;
 uniform vec3 wind_direction;
 uniform int wind_type;
 
-vec4 random_intensity_fixed_direction() {
 
-    return vec4(wind_direction.x, wind_direction.y, wind_direction.z, 1.0);
+/////////////////////////////////////////////////////////////////////////////
+// Description: Generic GLSL 1D Noise function							   //	
+// Author: Patricio Gonzalez Vivo										   //	
+// Link: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 //
+/////////////////////////////////////////////////////////////////////////////
 
+//	Simplex 2D noise
+//	by Ian McEwan, Ashima Arts
+//
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+  + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+    dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
 }
+/////////////////////////////////////////////////////////////////////////////
 
 vec4 random_intensity_fixed_direction(vec4 wind_dir) {
 
+    // Check for wall in between
+    int between_steps = 200;
+    
+    vec2 tex_pos = gl_GlobalInvocationID.xy;
+    vec2 current_texel = tex_pos;
+    vec2 source_dir = wind_dir.xz;
+    vec2 source_dir_step = normalize(source_dir) * TEXEL_DIM;
+    vec4 normal = vec4(0.0, 0.0, 0.0, 0.0);
+    
+    int step = 0; bool wall_between = false;
+    for (; step < between_steps; step++) {
+                
+        ivec2 texel = ivec2(tex_pos + source_dir_step * step);
+
+        if (texel.x < 0 || texel.x > TEX_X || texel.y < 0 || texel.y > TEX_Y) break;
+
+        if (texel == current_texel) continue;
+        else {
+                    
+            current_texel = texel;
+
+            normal = texelFetch(obstacle_normals_texture, texel, 0);
+
+            //if (normal != vec4(0.0, 0.0, 0.0, 0.0)) { wall_between = true; break; }
+
+            vec2 normal_xz = normalize(normal).xz;
+            vec2 parallel_xz = vec2(normal_xz.y, -normal_xz.x);
+            vec2 source_dir_xz = normalize(source_dir);
+
+            float dot_normal_source = dot (normal_xz, source_dir_xz);
+
+            if (dot_normal_source < 0.0) {wall_between = true; break;}
+
+        }
+
+    }
+
+    if (wall_between) wind_dir = mix (normalize(wind_dir) * 0.001, wind_dir, float(step) / float(between_steps));
+    else {
+
+        // Check for wall after
+        int after_steps = 50;
+        
+        vec2 away_source_dir = - wind_dir.xz;
+        vec2 away_source_dir_step = normalize(away_source_dir) * TEXEL_DIM;
+        //vec2 wind_dir_step = vec2(normalize(wind_dir).xz) * TEXEL_DIM;
+        vec2 parallel = vec2(0.0, 0.0);
+
+        int step = 0; bool wall_after = false;
+        for (; step < after_steps; step++) {
+                    
+            ivec2 texel = ivec2(tex_pos + away_source_dir_step * step);
+
+            if (texel == current_texel) continue;
+            else {
+                        
+                current_texel = texel;
+
+                normal = texelFetch(obstacle_normals_texture, texel, 0);
+
+                vec2 normal_xz = normalize(normal).xz;
+                vec2 parallel_xz = vec2(normal_xz.y, -normal_xz.x);
+                vec2 away_source_dir_xz = normalize(away_source_dir);
+
+                float dot_away_parallel = dot( parallel_xz, away_source_dir_xz );
+
+                if ( dot_away_parallel > 0.0 ) parallel_xz = - parallel_xz;
+                else if ( dot_away_parallel == 0.0 && snoise(gl_GlobalInvocationID.xy) < 0.5) parallel_xz = - parallel_xz;
+                
+                parallel = normalize(parallel_xz) * length(wind_dir);
+
+                float dot_normal_source = dot (normal_xz, away_source_dir_xz);
+
+                if (dot_normal_source < 0.0) {wall_after = true; break;}
+
+            }
+
+        }
+
+        if (wall_after) wind_dir = mix (normalize(vec4(parallel.x, 0.0, parallel.y, 1.0)) * length(wind_dir), wind_dir, float(step)/float(after_steps));
+    
+    }
+
     return vec4(wind_dir.x, wind_dir.y, wind_dir.z, 1.0);
+
+}
+
+vec4 random_intensity_fixed_direction() {
+
+    return random_intensity_fixed_direction(vec4(wind_direction.x, wind_direction.y, wind_direction.z, 1.0));
 
 }
 
