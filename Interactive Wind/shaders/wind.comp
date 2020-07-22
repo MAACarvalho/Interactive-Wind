@@ -524,6 +524,13 @@ void main() {
 
             break;
             
+        case 5:
+
+            wind += source_effect ( vec4(12.5, 12.5, 0.0, 10) );
+            wind += sink_effect ( vec4(-12.5, -12.5, 0.0, 10) );
+
+            break;
+
 		default:
 
 			wind = random_intensity_fixed_direction();

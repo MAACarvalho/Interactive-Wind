@@ -118,7 +118,6 @@ void main() {
 			float maxColorComponent = max(obstacle.x, max(obstacle.y, obstacle.z));
 
 			if (noise(DataIn[0].blade_id * rnd_seed + 1986) < maxColorComponent) {
-			//if ( obstacle == vec4(0,0,0,0)) {
 
 				gl_TessLevelOuter[0] = 0;
 				gl_TessLevelOuter[1] = 0;
@@ -126,18 +125,18 @@ void main() {
 			} else {
 
 				// Tessellating blade 
-				//if (!outside) {
+				if (!outside) {
 
-				gl_TessLevelOuter[0] = 1;
-				gl_TessLevelOuter[1] = bld_levels;
+					gl_TessLevelOuter[0] = 1;
+					gl_TessLevelOuter[1] = bld_levels;
 					
 				// Culling blade
-				// } else {
+				} else {
 
-				// 	gl_TessLevelOuter[0] = 0;
-				// 	gl_TessLevelOuter[1] = 0;
+				 	gl_TessLevelOuter[0] = 0;
+				 	gl_TessLevelOuter[1] = 0;
 
-				// }
+				}
 
 			}
 

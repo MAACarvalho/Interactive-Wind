@@ -22,9 +22,9 @@
 
 			<!-- Wind -->
 			<attribute name="WIND_DIR"  		data="VEC3" type="RENDERER" x="0" y="0" z="1" />
-			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="1" />
+			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="4.5" />
 			<attribute name="WIND_REFRESH_RATE" data="FLOAT" type="RENDERER" value="10000" />
-			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="4"   />
+			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="2"   />
 
 			<!-- Wind Perlin -->
 			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="3"   />
@@ -145,7 +145,7 @@
 			</pass>
 
 			<!-- Show Obstacle Pass -->
-			<pass class="default" name="ShowObstaclePass">
+			<!-- <pass class="default" name="ShowObstaclePass">
 				
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
@@ -158,10 +158,10 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-			</pass>
+			</pass> -->
 			
 			<!-- Store Obstacle Location Pass -->
-			<pass class="default" name="StoreObstacleLocationPass">
+			<!-- <pass class="default" name="StoreObstacleLocationPass">
 				<mode value="RUN_ONCE" />
 				
 				<COLOR_CLEAR value = false />
@@ -181,10 +181,10 @@
 				<materialMaps>
 					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 
 			<!-- Store Obstacle Normals Pass -->
-			<pass class="default" name="StoreObstacleNormalsPass">
+			<!-- <pass class="default" name="StoreObstacleNormalsPass">
 				<mode value="RUN_ONCE" />
 				
 				<COLOR_CLEAR value = false />
@@ -204,20 +204,20 @@
 				<materialMaps>
 					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleNormalsMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 
 			<!-- -Obstacle Tex Pass -->
-			<pass class="quad" name="ObstacleTexPass" >
+			<!-- <pass class="quad" name="ObstacleTexPass" >
 				<viewport name="ObstacleTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="ObstacleLib" toMaterial="ShowObstacleTexMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
-				<!-- <mode value="RUN_ONCE" /> -->
+				<mode value="RUN_ONCE" />
 				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
 			</pass>
 
@@ -244,7 +244,7 @@
 			</pass>
 
 			<!-- Axis Pass -->
-			<pass class="default" name="AxisPass" >
+			<!-- <pass class="default" name="AxisPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -252,16 +252,17 @@
 				<scenes>
 					<scene name="AxisScene" />
 				</scenes>	
-			</pass>
+			</pass> -->
 
 			<!-- Wind Tex Pass -->
-			<pass class="quad" name="WindTexPass" >
+
+			<!-- <pass class="quad" name="WindTexPass" >
 				<viewport name="WindTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="WindLib" toMaterial="ShowWindTexMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 		</pipeline>
 	</pipelines>
 	

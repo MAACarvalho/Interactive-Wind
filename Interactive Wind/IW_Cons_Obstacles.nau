@@ -21,10 +21,10 @@
 			<attribute name="BLADE_RANDOM_SEED"  		data="FLOAT" type="RENDERER" value="1.284" />
 
 			<!-- Wind -->
-			<attribute name="WIND_DIR"  		data="VEC3" type="RENDERER" x="0" y="0" z="1" />
-			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="1" />
+			<attribute name="WIND_DIR"  		data="VEC3" type="RENDERER" x="0.5" y="0" z="1" />
+			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="10" />
 			<attribute name="WIND_REFRESH_RATE" data="FLOAT" type="RENDERER" value="10000" />
-			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="4"   />
+			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="0"   />
 
 			<!-- Wind Perlin -->
 			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="3"   />
@@ -49,12 +49,32 @@
 			</scene>
 			<scene name="ObstacleScene" type="OctreeByMat">
 				<geometry name = "Wall1" type = "BOX" material="WallMat">
-					<TRANSLATE x=-2 y=4 z=-4/>
-					<SCALE x=1 y=4 z=2/>
+					<TRANSLATE x=-6 y=4 z=0/>
+					<SCALE x=0.5 y=4 z=0.5/>
 				</geometry>
 				<geometry name = "Wall2" type = "BOX" material="WallMat">
-					<TRANSLATE x=2 y=4 z=0/>
-					<SCALE x=2 y=4 z=2/>
+					<TRANSLATE x=-3 y=4 z=0/>
+					<SCALE x=0.5 y=4 z=0.5/>
+				</geometry>
+				<geometry name = "Wall3" type = "BOX" material="WallMat">
+					<TRANSLATE x=3 y=4 z=0/>
+					<SCALE x=0.5 y=4 z=0.5/>
+				</geometry>
+				<geometry name = "Wall4" type = "BOX" material="WallMat">
+					<TRANSLATE x=6 y=4 z=0/>
+					<SCALE x=0.5 y=4 z=0.5/>
+				</geometry>
+				<geometry name = "Wall5" type = "BOX" material="WallMat">
+					<TRANSLATE x=-3 y=4 z=-3/>
+					<SCALE x=0.5 y=4 z=0.5/>
+				</geometry>
+				<geometry name = "Wall6" type = "BOX" material="WallMat">
+					<TRANSLATE x=3 y=4 z=-3/>
+					<SCALE x=0.5 y=4 z=0.5/>
+				</geometry>
+				<geometry name = "Wall7" type = "BOX" material="WallMat">
+					<TRANSLATE x=0 y=4 z=-6/>
+					<SCALE x=0.5 y=4 z=0.5/>
 				</geometry>
 			</scene>
 		</scenes>
@@ -207,13 +227,13 @@
 			</pass>
 
 			<!-- -Obstacle Tex Pass -->
-			<pass class="quad" name="ObstacleTexPass" >
+			<!-- <pass class="quad" name="ObstacleTexPass" >
 				<viewport name="ObstacleTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="ObstacleLib" toMaterial="ShowObstacleTexMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 
 			<!-- Wind Pass -->
 			<pass class="compute" name="WindPass">
@@ -244,7 +264,7 @@
 			</pass>
 
 			<!-- Axis Pass -->
-			<pass class="default" name="AxisPass" >
+			<!-- <pass class="default" name="AxisPass" >
 				<COLOR_CLEAR value = false />
 				<DEPTH_CLEAR value = false />
 				<viewport name="MainViewport" />
@@ -252,16 +272,17 @@
 				<scenes>
 					<scene name="AxisScene" />
 				</scenes>	
-			</pass>
+			</pass> -->
 
 			<!-- Wind Tex Pass -->
-			<pass class="quad" name="WindTexPass" >
+
+			<!-- <pass class="quad" name="WindTexPass" >
 				<viewport name="WindTexViewport" />
 				<materialMaps>
 					<map fromMaterial="__Quad" 
 						 toLibrary="WindLib" toMaterial="ShowWindTexMat" />
 				</materialMaps>
-			</pass>
+			</pass> -->
 		</pipeline>
 	</pipelines>
 	
@@ -284,8 +305,8 @@
 			<var label="Wind Refresh"			type="RENDERER" context="CURRENT"
 				component="WIND_REFRESH_RATE"			def="min=10 max=100000 step=1000"/>
 
-			<var label="Wind Type" 				type="RENDERER" context="CURRENT"
-				component="WIND_TYPE" 					strings="FixedDirection,Vortex,Source,Sink,Texture"/>
+			<var label="Wind Scenes"			type="RENDERER" context="CURRENT"
+				component="WIND_TYPE" 					strings="FixedDirection,Vortex,Source,Sink,Texture,SinkSource"/>
 
 			<var label="Octaves"	  		  type="RENDERER" context="CURRENT"  component="OCTAVES"  	 def="min=1   max=16 step=1"/>
 			<var label="Persistence"  	  	  type="RENDERER" context="CURRENT"  component="PERSISTENCE" def="min=0.1 max=4  step=1"/>
