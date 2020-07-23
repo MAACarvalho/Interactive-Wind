@@ -22,7 +22,7 @@
 
 			<!-- Wind -->
 			<attribute name="WIND_DIR"  		data="VEC3" type="RENDERER" x="0.5" y="0" z="1" />
-			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="10" />
+			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="5" />
 			<attribute name="WIND_REFRESH_RATE" data="FLOAT" type="RENDERER" value="10000" />
 			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="0"   />
 

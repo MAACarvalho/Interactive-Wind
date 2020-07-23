@@ -1,0 +1,339 @@
+<?xml version="1.0" ?>
+<project name="Interactive Wind" width="1280" height="720">
+	<assets>
+		<attributes>
+
+			<!-- Grass Blades -->
+			<attribute name="BLADE_LEVELS" 				data="INT"  type="RENDERER" value="20" />
+			<attribute name="BLADE_HEIGHT" 				data="FLOAT" type="RENDERER" value="3.0" />
+			<attribute name="BLADE_HEIGHT_VAR"  		data="FLOAT" type="RENDERER" value="0.5" />
+			<attribute name="BLADE_WIDTH"   			data="FLOAT" type="RENDERER" value="0.05" />
+			<attribute name="BLADE_WIDTH_VAR"   		data="FLOAT" type="RENDERER" value="0.05" />
+			<attribute name="BLADE_SEPARATION"   		data="FLOAT" type="RENDERER" value="0.05" />
+			<attribute name="BLADE_SEPARATION_VAR"   	data="FLOAT" type="RENDERER" value="0.005" />
+			<attribute name="BLADE_INCLINATION"  		data="FLOAT" type="RENDERER" value="0.1"/>
+			<attribute name="BLADE_INCLINATION_VAR"  	data="FLOAT" type="RENDERER" value="0.02"/>
+			<attribute name="BLADE_STIFFNESS"  			data="FLOAT" type="RENDERER" value="0.835" />
+			<attribute name="BLADE_STIFFNESS_VAR"  		data="FLOAT" type="RENDERER" value="0.01" />
+			<attribute name="BLADE_ROTATION"  			data="FLOAT" type="RENDERER" value="0.0" />
+			<attribute name="BLADE_ROTATION_VAR"  		data="FLOAT" type="RENDERER" value="1.0" />
+			
+			<attribute name="BLADE_RANDOM_SEED"  		data="FLOAT" type="RENDERER" value="1.284" />
+
+			<!-- Wind -->
+			<attribute name="WIND_DIR"  		data="VEC3" type="RENDERER" x="0" y="0" z="1" />
+			<attribute name="WIND_SCALE" 		data="FLOAT" type="RENDERER" value="1" />
+			<attribute name="WIND_REFRESH_RATE" data="FLOAT" type="RENDERER" value="10000" />
+			<attribute name="WIND_TYPE" 		data="INT"   type="RENDERER" value="4"   />
+
+			<!-- Wind Perlin -->
+			<attribute name="OCTAVES"      data="INT"   type="RENDERER" value="3"   />
+			<attribute name="LACUNARITY"   data="FLOAT" type="RENDERER" value="1"   />
+			<attribute name="PERSISTENCE"  data="FLOAT" type="RENDERER" value="0.5" />
+			<attribute name="VAR_PER"      data="FLOAT" type="RENDERER" value="0.5" />
+
+		</attributes>
+		
+		<scenes>
+			<scene name="GrassBladeScene" type="OctreeByMat">
+				<file name="models/line.patch"/>
+			</scene>
+			<scene name="GroundScene" type="OctreeByMat">
+				<file name="models/plane.patch"/>
+				<SCALE x=15 y=1 z=15 />
+			</scene>
+			<scene name="AxisScene" type="Scene">
+				<geometry name = "Axis" type = "AXIS">
+					<SCALE x=30 y=30 z =30 />
+				</geometry>
+			</scene>
+			<scene name="ObstacleScene" type="OctreeByMat">
+				<geometry name = "Wall1" type = "BOX" material="WallMat">
+					<TRANSLATE x=-2 y=4 z=-4/>
+					<SCALE x=1 y=4 z=4/>
+				</geometry>
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0" g="0" b="0" />
+			</viewport>
+			<viewport name="WindTexViewport" >
+				<ORIGIN x=0.8 y=0.8 />
+				<SIZE width=0.2 height=0.2 />
+				<CLEAR_COLOR r="0" g="0" b="0" />
+			</viewport>
+			<viewport name="ObstacleTexViewport" >
+				<ORIGIN x=0.8 y=0.6 />
+				<SIZE width=0.2 height=0.2 />
+				<CLEAR_COLOR r="0" g="1" b="0" />
+			</viewport>
+			<viewport name="Grid">
+				<!-- <ORIGIN x=0.8 y=0 /> -->
+				<SIZE width=256 height=256 />
+				<CLEAR_COLOR r="0.0" g="1.0" b="0.0"/>
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<projection TYPE="PERSPECTIVE" NEAR=1 FAR=1000.0 />
+				<POSITION x=3.5 y=9 z=10 />
+				<LOOK_AT_POINT x=0 y=3 z=0 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+			<camera name="CameraX">
+				<viewport name="Grid" />
+				<projection TYPE="ORTHO"  NEAR=-15 FAR=15 LEFT=-15 RIGHT=15 />
+				<POSITION x=0.0 y=0.5 z=0.0 />
+				<VIEW x=1.0 y=0.0 z=0.0 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+			<camera name="CameraY">
+				<viewport name="Grid" />
+				<projection TYPE="ORTHO"  NEAR=-1 FAR=1 LEFT=-15 RIGHT=15 BOTTOM=-15 TOP=15/>
+				<POSITION x=0.0 y=0.0 z=0.0 />
+				<VIEW x=0.0 y=1.0 z=0.0 />
+				<UP x=0 y=0 z=1 />
+			</camera>
+			<camera name="CameraZ">
+				<viewport name="Grid" />
+				<projection TYPE="ORTHO"  NEAR=-15 FAR=15 LEFT=-15 RIGHT=15 />
+				<POSITION x=0 y=0.5 z=0.0 />
+				<VIEW x=0.0 y=0.0 z=1.0 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x=2 y=-1 z=-2 />
+			</light>
+		</lights>
+
+		<materialLibs>
+			<materialLib filename="materials/obstacle.mlib" />
+			<materialLib filename="materials/wind.mlib" />
+			<materialLib filename="materials/grass.mlib" />
+			<materialLib filename="materials/ground.mlib" />
+		</materialLibs>
+		
+	</assets>
+	
+	<pipelines>
+		<pipeline name="Grass" default="true" defaultCamera="MainCamera">
+
+			<!-- Ground Pass -->
+			<pass class="default" name="GroundPass" >
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="GroundScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*"  	toLibrary="GroundLib" 	toMaterial="GroundMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- Show Obstacle Pass -->
+			<pass class="default" name="ShowObstaclePass">
+				
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="ObstacleScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+			</pass>
+			
+			<!-- Store Obstacle Location Pass -->
+			<pass class="default" name="StoreObstacleLocationPass">
+				<mode value="RUN_ONCE" />
+				
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<COLOR_ENABLE value = false />
+				<DEPTH_MASK value = false />
+				<DEPTH_ENABLE value = false />
+
+				<scenes>
+					<scene name="ObstacleScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<viewport name="Grid" />
+				<renderTarget name="DummyRenderTarget" fromLibrary="ObstacleLib" />
+				<materialMaps>
+					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- Store Obstacle Normals Pass -->
+			<pass class="default" name="StoreObstacleNormalsPass">
+				<mode value="RUN_ONCE" />
+				
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<COLOR_ENABLE value = false />
+				<DEPTH_MASK value = false />
+				<DEPTH_ENABLE value = false />
+
+				<scenes>
+					<scene name="ObstacleScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<viewport name="Grid" />
+				<renderTarget name="DummyRenderTarget" fromLibrary="ObstacleLib" />
+				<materialMaps>
+					<map fromMaterial="WallMat" toLibrary="ObstacleLib" toMaterial="ObstacleNormalsMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- -Obstacle Tex Pass -->
+			<pass class="quad" name="ObstacleTexPass" >
+				<viewport name="ObstacleTexViewport" />
+				<materialMaps>
+					<map fromMaterial="__Quad" 
+						 toLibrary="ObstacleLib" toMaterial="ShowObstacleTexMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- Wind Pass -->
+			<pass class="compute" name="WindPass">
+				<!-- <mode value="RUN_ONCE" /> -->
+				<material name="WindMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
+			</pass>
+
+			<!-- Wind Var Pass -->
+			<pass class="compute" name="WindPass">
+				<material name="WindVarMat" fromLibrary="WindLib" dimX=256 dimY=256 dimZ=1 />
+			</pass>
+
+			<!-- Grass Pass -->
+			<pass class="default" name="GrassPass">
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes instances = 100000>
+					<scene name="GrassBladeScene" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="GrassLib" toMaterial="GrassMat" />
+				</materialMaps>
+			</pass>
+
+			<!-- Axis Pass -->
+			<pass class="default" name="AxisPass" >
+				<COLOR_CLEAR value = false />
+				<DEPTH_CLEAR value = false />
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<scenes>
+					<scene name="AxisScene" />
+				</scenes>	
+			</pass>
+
+			<!-- Wind Tex Pass -->
+			<pass class="quad" name="WindTexPass" >
+				<viewport name="WindTexViewport" />
+				<materialMaps>
+					<map fromMaterial="__Quad" 
+						 toLibrary="WindLib" toMaterial="ShowWindTexMat" />
+				</materialMaps>
+			</pass>
+		</pipeline>
+	</pipelines>
+	
+	<interface>
+		<window label="Ground Properties">
+
+			<var label="Ground Size"	type="SCENE" context="GroundScene"
+				component="SCALE" />
+
+		</window>
+
+		<window label="Wind Properties">
+
+			<var label="Wind Direction"			type="RENDERER" context="CURRENT"
+				component="WIND_DIR" />
+			
+			<var label="Wind Scale"				type="RENDERER" context="CURRENT"
+				component="WIND_SCALE" 					def="min=0 max=100 step=1"/>
+
+			<var label="Wind Refresh"			type="RENDERER" context="CURRENT"
+				component="WIND_REFRESH_RATE"			def="min=10 max=100000 step=1000"/>
+
+			<var label="Wind Type" 				type="RENDERER" context="CURRENT"
+				component="WIND_TYPE" 					strings="FixedDirection,Vortex,Source,Sink,Texture"/>
+
+			<var label="Octaves"	  		  type="RENDERER" context="CURRENT"  component="OCTAVES"  	 def="min=1   max=16 step=1"/>
+			<var label="Persistence"  	  	  type="RENDERER" context="CURRENT"  component="PERSISTENCE" def="min=0.1 max=4  step=1"/>
+			<var label="Lacunarity"	  		  type="RENDERER" context="CURRENT"  component="LACUNARITY"  def="min=1   max=8  step=1"/>
+			<var label="Variation Percentage" type="RENDERER" context="CURRENT"  component="VAR_PER"  	 def="min=0   max=1  step=0.1"/>
+
+		</window>
+
+		<window label="Grass Blade Properties">
+
+			<var label="Levels" 				type="RENDERER" context="CURRENT"
+				component="BLADE_LEVELS" 				def="min=1 max=64 step=1"/>
+
+			<var label="Height" 				type="RENDERER" context="CURRENT" 
+				component="BLADE_HEIGHT" 				def="min=0.1 max=5.0 step=0.1" />
+
+			<var label="Height Var" 			type="RENDERER" context="CURRENT" 
+				component="BLADE_HEIGHT_VAR" 			def="min=0.00 max=1.0 step=0.05" />
+			
+			<var label="Width"  				type="RENDERER" context="CURRENT"  	
+				component="BLADE_WIDTH"  				def="min=0.05 max=1.0 step=0.05"/>
+
+			<var label="Width Var" 				type="RENDERER" context="CURRENT" 
+				component="BLADE_WIDTH_VAR"		 		def="min=0.00 max=1.0 step=0.05" />
+			
+			<var label="Separation"  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_SEPARATION"  			def="min=0.00 max=2.0 step=0.05"/>
+			
+			<var label="Separation Var"  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_SEPARATION_VAR"  		def="min=0.00 max=2.0 step=0.05"/>
+
+			<var label="Inclination"  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_INCLINATION"  			def="min=0 max=1 step=0.05"/>
+			
+			<var label="Inclination Var"  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_INCLINATION_VAR"  		def="min=0 max=1 step=0.05"/>
+
+			<var label="Stiffness"  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_STIFFNESS"  			def="min=0 max=1 step=0.05"/>
+			
+			<var label="Stiffness Var"  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_STIFFNESS_VAR"  		def="min=0 max=1 step=0.05"/>
+
+			<var label="Rotation"	  			type="RENDERER" context="CURRENT"  	
+				component="BLADE_ROTATION"  			def="min=0 max=1 step=0.05"/>
+
+			<var label="Rotation Var"	  		type="RENDERER" context="CURRENT"  	
+				component="BLADE_ROTATION_VAR"  		def="min=0 max=1 step=0.05"/>
+
+			<var label="Random Seed"		  	type="RENDERER" context="CURRENT"  	
+				component="BLADE_RANDOM_SEED"  			def="min=0 max=2 step=0.025"/>
+			
+		</window>
+	</interface>
+</project>
